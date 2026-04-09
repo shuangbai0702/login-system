@@ -38,8 +38,8 @@ router.post('/register', async (req, res) => {
     }
 
     // 检查用户名是否已存在
-    const [existing] = await db.query(
-      'SELECT id FROM users WHERE username = ?',
+    const { rows: existing } = await db.query(
+      'SELECT id FROM users WHERE username = $1',
       [username]
     );
 
@@ -52,8 +52,8 @@ router.post('/register', async (req, res) => {
 
     // 检查邮箱是否已存在
     if (email) {
-      const [existingEmail] = await db.query(
-        'SELECT id FROM users WHERE email = ?',
+      const { rows: existingEmail } = await db.query(
+        'SELECT id FROM users WHERE email = $1',
         [email]
       );
       if (existingEmail.length > 0) {
@@ -68,15 +68,15 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 插入用户
-    const [result] = await db.query(
-      'INSERT INTO users (username, password, email, nickname) VALUES (?, ?, ?, ?)',
+    // 插入用户并返回新用户 ID
+    const { rows: [result] } = await db.query(
+      'INSERT INTO users (username, password, email, nickname) VALUES ($1, $2, $3, $4) RETURNING id',
       [username, hashedPassword, email || null, nickname || username]
     );
 
     // 生成 Token
     const token = generateToken({
-      id: result.insertId,
+      id: result.id,
       username: username
     });
 
@@ -86,7 +86,7 @@ router.post('/register', async (req, res) => {
       data: {
         token,
         user: {
-          id: result.insertId,
+          id: result.id,
           username,
           email: email || null,
           nickname: nickname || username
@@ -119,8 +119,8 @@ router.post('/login', async (req, res) => {
     }
 
     // 查找用户
-    const [users] = await db.query(
-      'SELECT id, username, password, email, nickname, avatar, status FROM users WHERE username = ?',
+    const { rows: users } = await db.query(
+      'SELECT id, username, password, email, nickname, avatar, status FROM users WHERE username = $1',
       [username]
     );
 
@@ -185,8 +185,8 @@ router.post('/login', async (req, res) => {
 // ============================================
 router.get('/profile', authMiddleware, async (req, res) => {
   try {
-    const [users] = await db.query(
-      'SELECT id, username, email, nickname, avatar, status, created_at FROM users WHERE id = ?',
+    const { rows: users } = await db.query(
+      'SELECT id, username, email, nickname, avatar, status, created_at FROM users WHERE id = $1',
       [req.user.id]
     );
 

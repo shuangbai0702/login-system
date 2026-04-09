@@ -1,34 +1,54 @@
 -- ============================================
--- 登录系统 - 数据库初始化脚本
--- 使用方法：在 MySQL 中执行此脚本
---   mysql -u root -p < init-db.sql
+-- 登录系统 - 数据库初始化脚本（PostgreSQL）
+-- 使用方法：
+--   psql -U postgres -f init-db.sql
+-- 或在 psql 交互中执行：
+--   \i init-db.sql
 -- ============================================
 
--- 创建数据库
-CREATE DATABASE IF NOT EXISTS login_system
-  DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_unicode_ci;
-
--- 使用该数据库
-USE login_system;
-
 -- 创建用户表
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY COMMENT '用户ID',
-  `username` VARCHAR(50) NOT NULL COMMENT '用户名',
-  `password` VARCHAR(255) NOT NULL COMMENT '加密后的密码',
-  `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
-  `nickname` VARCHAR(50) DEFAULT NULL COMMENT '昵称',
-  `avatar` VARCHAR(255) DEFAULT NULL COMMENT '头像URL',
-  `status` TINYINT DEFAULT 1 COMMENT '状态：1=正常，0=禁用',
-  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  UNIQUE KEY `uk_username` (`username`),
-  UNIQUE KEY `uk_email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
+DROP TABLE IF EXISTS users;
+CREATE TABLE users (
+  id          SERIAL PRIMARY KEY,
+  username    VARCHAR(50)  NOT NULL,
+  password    VARCHAR(255) NOT NULL,
+  email       VARCHAR(100) DEFAULT NULL,
+  nickname    VARCHAR(50)  DEFAULT NULL,
+  avatar      VARCHAR(255) DEFAULT NULL,
+  status      SMALLINT     DEFAULT 1,
+  created_at  TIMESTAMP    DEFAULT NOW(),
+  updated_at  TIMESTAMP    DEFAULT NOW(),
+  CONSTRAINT  uk_username  UNIQUE (username),
+  CONSTRAINT  uk_email     UNIQUE (email)
+);
+
+-- 为 updated_at 创建自动更新触发器
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER users_updated_at
+  BEFORE UPDATE ON users
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- 添加表注释
+COMMENT ON TABLE  users IS '用户表';
+COMMENT ON COLUMN users.id         IS '用户ID';
+COMMENT ON COLUMN users.username   IS '用户名';
+COMMENT ON COLUMN users.password   IS '加密后的密码';
+COMMENT ON COLUMN users.email      IS '邮箱';
+COMMENT ON COLUMN users.nickname   IS '昵称';
+COMMENT ON COLUMN users.avatar     IS '头像URL';
+COMMENT ON COLUMN users.status     IS '状态：1=正常，0=禁用';
+COMMENT ON COLUMN users.created_at IS '创建时间';
+COMMENT ON COLUMN users.updated_at IS '更新时间';
 
 -- 插入一个默认测试账号（密码：123456）
 -- bcrypt hash of '123456'
-INSERT INTO `users` (`username`, `password`, `email`, `nickname`) VALUES
+INSERT INTO users (username, password, email, nickname) VALUES
 ('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin@example.com', '管理员');
