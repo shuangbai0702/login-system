@@ -1,0 +1,9 @@
+{
+  "name": "login-system",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "cd server && node index.js",
+    "install": "cd server && npm install"
+  }
+}
