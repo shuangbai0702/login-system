@@ -98,7 +98,7 @@ app.get('/api/health', (req, res) => {
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // 所有其他路由返回前端页面
-app.get('*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
 });
 
