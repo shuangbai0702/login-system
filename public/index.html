@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣味测试</title>
+    <style>
+        /* ========== 全局重置与基础 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        /* ========== 粒子画布 ========== */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ========== 网格背景 ========== */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #FFF8F0;
+            background-image:
+                linear-gradient(rgba(255, 182, 193, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 182, 193, 0.3) 1px, transparent 1px);
+            background-size: 24px 24px;
+            z-index: 0;
+        }
+
+        .grid-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(255, 240, 220, 0.6) 100%);
+            pointer-events: none;
+        }
+
+        /* ========== 装饰角标 ========== */
+        .corner-decor {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            z-index: 1;
+            opacity: 0.4;
+        }
+        .corner-decor::before,
+        .corner-decor::after {
+            content: '';
+            position: absolute;
+            background: #E8A0B4;
+        }
+        .corner-tl { top: 20px; left: 20px; }
+        .corner-tl::before { top: 0; left: 0; width: 30px; height: 2px; }
+        .corner-tl::after { top: 0; left: 0; width: 2px; height: 30px; }
+
+        .corner-tr { top: 20px; right: 20px; }
+        .corner-tr::before { top: 0; right: 0; width: 30px; height: 2px; }
+        .corner-tr::after { top: 0; right: 0; width: 2px; height: 30px; }
+
+        .corner-bl { bottom: 20px; left: 20px; }
+        .corner-bl::before { bottom: 0; left: 0; width: 30px; height: 2px; }
+        .corner-bl::after { bottom: 0; left: 0; width: 2px; height: 30px; }
+
+        .corner-br { bottom: 20px; right: 20px; }
+        .corner-br::before { bottom: 0; right: 0; width: 30px; height: 2px; }
+        .corner-br::after { bottom: 0; right: 0; width: 2px; height: 30px; }
+
+        /* ========== 浮动装饰圆点 ========== */
+        .floating-dots {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .dot {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.5;
+            animation: floatDot 6s ease-in-out infinite;
+        }
+
+        @keyframes floatDot {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* ========== 卡片容器 ========== */
+        .quiz-card {
+            position: relative;
+            z-index: 10;
+            width: 520px;
+            max-width: 92vw;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 48px 40px 40px;
+            box-shadow:
+                0 8px 32px rgba(200, 150, 170, 0.2),
+                0 2px 8px rgba(200, 150, 170, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            border: 1.5px solid rgba(232, 160, 180, 0.3);
+            animation: cardFadeIn 0.8s ease-out;
+        }
+
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .quiz-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #E8A0B4, #F0C27F, #E8A0B4);
+            border-radius: 0 0 4px 4px;
+        }
+
+        /* ========== 鼠标跟随光效 ========== */
+        .card-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: radial-gradient(circle 200px at var(--glow-x, 50%) var(--glow-y, 50%), rgba(232, 160, 180, 0.12), transparent);
+        }
+
+        .quiz-card:hover .card-glow {
+            opacity: 1;
+        }
+
+        /* ========== 标题区域 ========== */
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 36px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quiz-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2D2D2D;
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+
+        .quiz-header .subtitle {
+            font-size: 13px;
+            color: #C4956A;
+            letter-spacing: 2px;
+            font-weight: 400;
+        }
+
+        /* ========== 返回首页链接 ========== */
+        .back-home-link {
+            display: inline-block;
+            font-size: 12px;
+            color: #B8A0A8;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: color 0.2s ease;
+            position: relative;
+            z-index: 1;
+            user-select: none;
+        }
+
+        .back-home-link:hover {
+            color: #D4849A;
+        }
+
+        /* ========== 返回按钮 ========== */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #8B7B8B;
+            cursor: pointer;
+            margin-bottom: 24px;
+            transition: color 0.2s ease;
+            background: none;
+            border: none;
+            font-family: inherit;
+            position: relative;
+            z-index: 1;
+            user-select: none;
+        }
+
+        .back-btn:hover {
+            color: #D4849A;
+        }
+
+        /* ========== 主按钮 ========== */
+        .quiz-btn {
+            width: 100%;
+            height: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 6px;
+            color: #FFF;
+            background: linear-gradient(135deg, #E8A0B4, #D4849A);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(232, 160, 180, 0.35);
+            font-family: inherit;
+        }
+
+        .quiz-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(232, 160, 180, 0.45), 0 0 20px rgba(232, 160, 180, 0.3);
+            animation: btnGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes btnGlow {
+            from { box-shadow: 0 6px 24px rgba(232, 160, 180, 0.45), 0 0 15px rgba(232, 160, 180, 0.2); }
+            to { box-shadow: 0 6px 24px rgba(232, 160, 180, 0.55), 0 0 30px rgba(232, 160, 180, 0.4); }
+        }
+
+        .quiz-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(232, 160, 180, 0.3);
+        }
+
+        .quiz-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 40%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transform: skewX(-20deg);
+            animation: btnShine 4s ease-in-out infinite;
+        }
+
+        @keyframes btnShine {
+            0%, 75%, 100% { left: -60%; }
+            50% { left: 120%; }
+        }
+
+        .quiz-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 8px rgba(232, 160, 180, 0.2);
+            animation: none;
+        }
+
+        .quiz-btn:disabled::after {
+            display: none;
+        }
+
+        /* ========== 次要按钮（分享等） ========== */
+        .quiz-btn-outline {
+            width: 100%;
+            height: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            color: #D4849A;
+            background: transparent;
+            border: 1.5px solid #E8A0B4;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .quiz-btn-outline:hover {
+            background: rgba(232, 160, 180, 0.1);
+            transform: translateY(-1px);
+            box-shadow: 0 0 15px rgba(232, 160, 180, 0.2);
+        }
+
+        /* ========== 面板切换 ========== */
+        .panel {
+            display: none;
+            position: relative;
+            z-index: 1;
+        }
+        .panel.active {
+            display: block;
+            animation: panelFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes panelFadeIn {
+            from { opacity: 0; transform: scale(0.92) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* ========== 分类卡片网格 ========== */
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .category-card {
+            background: rgba(255, 248, 240, 0.6);
+            border: 1.5px solid rgba(232, 160, 180, 0.2);
+            border-radius: 12px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(232, 160, 180, 0.1), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .category-card:hover::before {
+            opacity: 1;
+        }
+
+        .category-card:hover {
+            border-color: rgba(232, 160, 180, 0.5);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(232, 160, 180, 0.2);
+        }
+
+        .category-card:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .category-emoji {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .category-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2D2D2D;
+            margin-bottom: 8px;
+        }
+
+        .category-count {
+            display: inline-block;
+            font-size: 11px;
+            color: #D4849A;
+            background: rgba(232, 160, 180, 0.12);
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        /* ========== 问卷列表 ========== */
+        .quiz-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .quiz-item {
+            background: rgba(255, 248, 240, 0.6);
+            border: 1.5px solid rgba(232, 160, 180, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .quiz-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(232, 160, 180, 0.1), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .quiz-item:hover::before {
+            opacity: 1;
+        }
+
+        .quiz-item:hover {
+            border-color: rgba(232, 160, 180, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 160, 180, 0.18);
+        }
+
+        .quiz-item:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .quiz-item-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .quiz-item-emoji {
+            font-size: 32px;
+        }
+
+        .quiz-item-info {
+            flex: 1;
+        }
+
+        .quiz-item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2D2D2D;
+            margin-bottom: 2px;
+        }
+
+        .quiz-item-meta {
+            font-size: 12px;
+            color: #B8A0A8;
+        }
+
+        .quiz-item-desc {
+            font-size: 13px;
+            color: #8B7B8B;
+            line-height: 1.6;
+            padding-left: 44px;
+        }
+
+        /* ========== 进度条 ========== */
+        .progress-wrapper {
+            margin-bottom: 28px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #8B7B8B;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(232, 160, 180, 0.15);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #E8A0B4, #F0C27F, #E8A0B4, #F0C27F);
+            background-size: 200% 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            width: 0%;
+            animation: progressFlow 2s linear infinite;
+        }
+
+        @keyframes progressFlow {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        /* ========== 问题区域 ========== */
+        .question-text {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #2D2D2D;
+            margin-bottom: 24px;
+            font-weight: 500;
+            min-height: 54px;
+        }
+
+        /* ========== 选项卡片 ========== */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .option-card {
+            padding: 14px 18px;
+            border: 1.5px solid rgba(232, 160, 180, 0.25);
+            border-radius: 10px;
+            background: rgba(255, 248, 240, 0.5);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-size: 14px;
+            line-height: 1.6;
+            color: #4A3F4F;
+            position: relative;
+            user-select: none;
+            overflow: hidden;
+        }
+
+        /* 鼠标跟随光效 */
+        .option-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle 120px at var(--glow-x, 50%) var(--glow-y, 50%), rgba(232, 160, 180, 0.08), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            border-radius: 10px;
+        }
+
+        .option-card:hover::after {
+            opacity: 1;
+        }
+
+        .option-card:hover {
+            border-color: rgba(232, 160, 180, 0.5);
+            background: rgba(255, 248, 240, 0.8);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(232, 160, 180, 0.15);
+        }
+
+        .option-card.selected {
+            border-color: #E8A0B4;
+            background: rgba(232, 160, 180, 0.12);
+            box-shadow: 0 2px 12px rgba(232, 160, 180, 0.2);
+            transform: scale(1.02);
+        }
+
+        .option-card.selected::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #E8A0B4, #D4849A);
+            border-radius: 10px 0 0 10px;
+        }
+
+        /* 水波纹效果 */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(232, 160, 180, 0.3);
+            transform: scale(0);
+            animation: rippleEffect 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* 弹性缩放动画 */
+        .option-card.bounce-select {
+            animation: bounceSelect 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes bounceSelect {
+            0% { transform: scale(1); }
+            30% { transform: scale(0.95); }
+            60% { transform: scale(1.04); }
+            100% { transform: scale(1.02); }
+        }
+
+        /* stagger 入场动画 */
+        .option-card.stagger-enter {
+            opacity: 0;
+            transform: translateX(30px);
+            animation: staggerSlideIn 0.35s ease-out forwards;
+        }
+
+        @keyframes staggerSlideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .option-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(232, 160, 180, 0.15);
+            color: #D4849A;
+            font-size: 12px;
+            font-weight: 700;
+            margin-right: 12px;
+            flex-shrink: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .option-card.selected .option-label {
+            background: linear-gradient(135deg, #E8A0B4, #D4849A);
+            color: #FFF;
+            transform: scale(1.15);
+        }
+
+        .option-content {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-text {
+            flex: 1;
+        }
+
+        /* ========== 结果页 ========== */
+        .result-section {
+            text-align: center;
+        }
+
+        .result-emoji {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: resultBounce 0.6s ease-out;
+        }
+
+        @keyframes resultBounce {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .result-score-label {
+            font-size: 13px;
+            color: #8B7B8B;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+
+        .result-score {
+            font-size: 56px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #E8A0B4, #D4849A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        .result-score-max {
+            font-size: 14px;
+            color: #B8A0A8;
+            margin-bottom: 16px;
+        }
+
+        .result-level {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2D2D2D;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .result-subtitle {
+            font-size: 13px;
+            color: #B8A0A8;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        .result-desc {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #6B5B73;
+            text-align: left;
+            background: rgba(255, 248, 240, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(232, 160, 180, 0.15);
+        }
+
+        .result-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* ========== 首页装饰 ========== */
+        .home-icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+            animation: homeFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes homeFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .home-desc {
+            font-size: 13px;
+            color: #8B7B8B;
+            line-height: 1.8;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .home-desc strong {
+            color: #D4849A;
+        }
+
+        /* ========== Toast 提示 ========== */
+        .toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 14px 28px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            border: 1px solid rgba(232, 160, 180, 0.3);
+            font-size: 14px;
+            color: #6B5B73;
+            z-index: 1000;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 90vw;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon {
+            font-size: 18px;
+        }
+
+        /* ========== 淡入淡出动画 ========== */
+        .fade-enter {
+            animation: fadeEnter 0.35s ease-out;
+        }
+
+        @keyframes fadeEnter {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* ========== Confetti 画布 ========== */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 560px) {
+            .quiz-card {
+                padding: 36px 24px 32px;
+                margin: 16px;
+            }
+            .quiz-header h1 { font-size: 24px; letter-spacing: 2px; }
+            .quiz-btn { height: 46px; font-size: 15px; letter-spacing: 4px; }
+            .quiz-btn-outline { height: 46px; font-size: 15px; }
+            .question-text { font-size: 15px; }
+            .option-card { padding: 12px 14px; font-size: 13px; }
+            .result-score { font-size: 48px; }
+            .result-emoji { font-size: 52px; }
+            .home-icon { font-size: 56px; }
+            .category-emoji { font-size: 32px; }
+            .category-card { padding: 18px 12px; }
+            .category-name { font-size: 14px; }
+        }
+
+        @media (max-width: 380px) {
+            .quiz-card {
+                padding: 28px 18px 24px;
+            }
+            .quiz-header h1 { font-size: 22px; }
+            .option-card { padding: 10px 12px; font-size: 12px; }
+            .option-label { width: 20px; height: 20px; font-size: 11px; margin-right: 8px; }
+            .category-grid { gap: 10px; }
+            .category-card { padding: 14px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 粒子画布 -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- 网格背景 -->
+    <div class="grid-bg"></div>
+
+    <!-- 装饰角标 -->
+    <div class="corner-decor corner-tl"></div>
+    <div class="corner-decor corner-tr"></div>
+    <div class="corner-decor corner-bl"></div>
+    <div class="corner-decor corner-br"></div>
+
+    <!-- 浮动装饰圆点 -->
+    <div class="floating-dots">
+        <div class="dot" style="width:10px;height:10px;background:#7EB8DA;top:12%;left:8%;animation-delay:0s;"></div>
+        <div class="dot" style="width:8px;height:8px;background:#B088D0;top:18%;right:12%;animation-delay:1s;"></div>
+        <div class="dot" style="width:12px;height:12px;background:#E8A0B4;bottom:20%;left:15%;animation-delay:2s;"></div>
+        <div class="dot" style="width:6px;height:6px;background:#6BCB77;bottom:30%;right:10%;animation-delay:0.5s;"></div>
+        <div class="dot" style="width:9px;height:9px;background:#F0C27F;top:60%;left:5%;animation-delay:3s;"></div>
+        <div class="dot" style="width:7px;height:7px;background:#E74C3C;top:35%;right:6%;animation-delay:1.5s;"></div>
+        <div class="dot" style="width:11px;height:11px;background:#7EB8DA;bottom:10%;left:45%;animation-delay:2.5s;"></div>
+        <div class="dot" style="width:8px;height:8px;background:#B088D0;top:8%;left:50%;animation-delay:4s;"></div>
+    </div>
+
+    <!-- Confetti 画布 -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- 卡片 -->
+    <div class="quiz-card" id="mainCard">
+        <!-- 鼠标跟随光效 -->
+        <div class="card-glow" id="cardGlow"></div>
+
+        <!-- 标题 -->
+        <div class="quiz-header">
+            <h1 id="cardTitle">趣味测试</h1>
+            <p class="subtitle" id="cardSubtitle">选一个分类开始吧</p>
+        </div>
+
+        <!-- ====== 首页面板（分类选择） ====== -->
+        <div class="panel active" id="homePanel">
+            <div style="text-align:center;">
+                <div class="home-icon">✨</div>
+                <div class="home-desc">
+                    发现有趣的性格测试<br>
+                    每一份问卷都是一次自我探索的旅程
+                </div>
+            </div>
+            <div class="category-grid" id="categoryGrid"></div>
+        </div>
+
+        <!-- ====== 问卷列表面板 ====== -->
+        <div class="panel" id="listPanel">
+            <button class="back-btn" onclick="goHome()">
+                <span>←</span>
+                <span>返回</span>
+            </button>
+            <div class="quiz-list" id="quizList"></div>
+        </div>
+
+        <!-- ====== 答题面板 ====== -->
+        <div class="panel" id="quizPanel">
+            <span class="back-home-link" onclick="goToList()">← 返回问卷列表</span>
+            <!-- 进度条 -->
+            <div class="progress-wrapper">
+                <div class="progress-info">
+                    <span id="progressText">1 / 20</span>
+                    <span id="progressPercent">5%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+            </div>
+
+            <!-- 问题 -->
+            <div class="question-text" id="questionText"></div>
+
+            <!-- 选项 -->
+            <div class="options-list" id="optionsList"></div>
+
+            <!-- 下一题按钮 -->
+            <button class="quiz-btn" id="nextBtn" disabled onclick="nextQuestion()">下 一 题</button>
+        </div>
+
+        <!-- ====== 结果面板 ====== -->
+        <div class="panel" id="resultPanel">
+            <span class="back-home-link" onclick="goHome()">← 返回首页</span>
+            <div class="result-section">
+                <div class="result-emoji" id="resultEmoji"></div>
+                <div class="result-score-label">你的得分</div>
+                <div class="result-score" id="resultScore">0</div>
+                <div class="result-score-max">满分 100</div>
+                <div class="result-subtitle" id="resultSubtitle" style="display:none;"></div>
+                <div class="result-level" id="resultLevel"></div>
+                <div class="result-desc" id="resultDesc"></div>
+                <div class="result-buttons">
+                    <button class="quiz-btn" onclick="restartQuiz()">重 新 测 试</button>
+                    <button class="quiz-btn-outline" onclick="shareResult()">分 享 结 果</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Toast 提示 -->
+    <div class="toast" id="toast">
+        <span class="toast-icon" id="toastIcon"></span>
+        <span id="toastMsg"></span>
+    </div>
+
+    <!-- 问卷注册表（必须在问卷文件之前加载） -->
+    <script>
+        window.QuizRegistry = {
+            categories: [],
+            register: function(quiz) {
+                // quiz 格式: { categoryId, categoryName, categoryEmoji, quizId, quizName, quizEmoji, quizDesc, quizData, quizResults, resultMode }
+                let cat = this.categories.find(c => c.id === quiz.categoryId);
+                if (!cat) {
+                    cat = { id: quiz.categoryId, name: quiz.categoryName, emoji: quiz.categoryEmoji, quizzes: [] };
+                    this.categories.push(cat);
+                }
+                cat.quizzes.push({
+                    id: quiz.quizId,
+                    name: quiz.quizName,
+                    emoji: quiz.quizEmoji,
+                    desc: quiz.quizDesc,
+                    data: quiz.quizData,
+                    results: quiz.quizResults,
+                    resultMode: quiz.resultMode || 'score'
+                });
+            }
+        };
+    </script>
+
+    <!-- 加载所有问卷文件（在注册表之后） -->
+    <script src="quizzes/guinan.js"></script>
+    <script src="quizzes/lolicon.js"></script>
+    <script src="quizzes/innertest.js"></script>
+
+    <script>
+        // ============================================
+        // 状态管理
+        // ============================================
+        let currentQuestion = 0;
+        let shuffledQuiz = [];
+        let answers = [];
+        let totalScore = 0;
+        let currentResult = null;
+        let currentQuiz = null; // 当前选中的问卷对象
+        let currentCategory = null; // 当前选中的分类对象
+
+        const optionLabels = ['A', 'B', 'C', 'D'];
+
+        // ============================================
+        // Toast 提示（带emoji）
+        // ============================================
+        let toastTimer = null;
+        function showToast(message, icon) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+            toastMsg.textContent = message;
+            toastIcon.textContent = icon || '💬';
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============================================
+        // Fisher-Yates 洗牌算法
+        // ============================================
+        function shuffleArray(arr) {
+            const shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // ============================================
+        // 面板切换（scale + fade 组合）
+        // ============================================
+        function switchPanel(panelId) {
+            const panels = document.querySelectorAll('.panel');
+            panels.forEach(p => {
+                p.classList.remove('active');
+            });
+            // 用 requestAnimationFrame 确保动画触发
+            requestAnimationFrame(() => {
+                document.getElementById(panelId).classList.add('active');
+            });
+        }
+
+        // ============================================
+        // 渲染首页分类网格
+        // ============================================
+        function renderCategories() {
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = '';
+            QuizRegistry.categories.forEach((cat, idx) => {
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                card.setAttribute('role', 'button');
+                card.setAttribute('tabindex', '0');
+                card.style.animationDelay = (idx * 0.1) + 's';
+                card.innerHTML = `
+                    <span class="category-emoji">${cat.emoji}</span>
+                    <div class="category-name">${cat.name}</div>
+                    <span class="category-count">${cat.quizzes.length} 个问卷</span>
+                `;
+                card.addEventListener('click', () => openCategory(cat));
+                // 鼠标跟随光效
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    card.style.setProperty('--glow-x', (e.clientX - rect.left) + 'px');
+                    card.style.setProperty('--glow-y', (e.clientY - rect.top) + 'px');
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        // ============================================
+        // 打开分类（进入问卷列表）
+        // ============================================
+        function openCategory(cat) {
+            currentCategory = cat;
+            document.getElementById('cardTitle').textContent = cat.name;
+            document.getElementById('cardSubtitle').textContent = `共 ${cat.quizzes.length} 个问卷`;
+            renderQuizList(cat);
+            switchPanel('listPanel');
+        }
+
+        // ============================================
+        // 渲染问卷列表
+        // ============================================
+        function renderQuizList(cat) {
+            const list = document.getElementById('quizList');
+            list.innerHTML = '';
+            cat.quizzes.forEach((quiz, idx) => {
+                const item = document.createElement('div');
+                item.className = 'quiz-item';
+                item.setAttribute('role', 'button');
+                item.setAttribute('tabindex', '0');
+                item.style.animationDelay = (idx * 0.1) + 's';
+                item.innerHTML = `
+                    <div class="quiz-item-header">
+                        <span class="quiz-item-emoji">${quiz.emoji}</span>
+                        <div class="quiz-item-info">
+                            <div class="quiz-item-name">${quiz.name}</div>
+                            <div class="quiz-item-meta">${quiz.desc}</div>
+                        </div>
+                    </div>
+                `;
+                item.addEventListener('click', () => startQuiz(quiz));
+                // 鼠标跟随光效
+                item.addEventListener('mousemove', (e) => {
+                    const rect = item.getBoundingClientRect();
+                    item.style.setProperty('--glow-x', (e.clientX - rect.left) + 'px');
+                    item.style.setProperty('--glow-y', (e.clientY - rect.top) + 'px');
+                });
+                list.appendChild(item);
+            });
+        }
+
+        // ============================================
+        // 返回首页
+        // ============================================
+        function goHome() {
+            document.getElementById('cardTitle').textContent = '趣味测试';
+            document.getElementById('cardSubtitle').textContent = '选一个分类开始吧';
+            switchPanel('homePanel');
+        }
+
+        // ============================================
+        // 返回问卷列表
+        // ============================================
+        function goToList() {
+            if (currentCategory) {
+                document.getElementById('cardTitle').textContent = currentCategory.name;
+                document.getElementById('cardSubtitle').textContent = `共 ${currentCategory.quizzes.length} 个问卷`;
+                switchPanel('listPanel');
+            } else {
+                goHome();
+            }
+        }
+
+        // ============================================
+        // 开始测试
+        // ============================================
+        function startQuiz(quiz) {
+            currentQuiz = quiz;
+            currentQuestion = 0;
+            answers = [];
+            totalScore = 0;
+            currentResult = null;
+
+            document.getElementById('cardTitle').textContent = quiz.name;
+            document.getElementById('cardSubtitle').textContent = quiz.desc;
+
+            // 深拷贝并打乱每题的选项顺序
+            shuffledQuiz = quiz.data.map(q => ({
+                ...q,
+                options: shuffleArray(q.options)
+            }));
+
+            switchPanel('quizPanel');
+            renderQuestion();
+        }
+
+        // ============================================
+        // 渲染当前问题（带 stagger 动画）
+        // ============================================
+        function renderQuestion() {
+            const q = shuffledQuiz[currentQuestion];
+            const total = shuffledQuiz.length;
+            const progress = ((currentQuestion) / total) * 100;
+
+            // 更新进度条
+            document.getElementById('progressText').textContent = (currentQuestion + 1) + ' / ' + total;
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // 更新问题文本
+            document.getElementById('questionText').textContent = q.question;
+
+            // 渲染选项（stagger 入场）
+            const optionsList = document.getElementById('optionsList');
+            optionsList.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const card = document.createElement('div');
+                card.className = 'option-card stagger-enter';
+                card.style.animationDelay = (idx * 0.05) + 's';
+                card.setAttribute('data-score', opt.score !== undefined ? opt.score : JSON.stringify(opt.scores));
+                card.innerHTML = `
+                    <div class="option-content">
+                        <span class="option-label">${optionLabels[idx]}</span>
+                        <span class="option-text">${opt.text}</span>
+                    </div>
+                `;
+                card.addEventListener('click', (e) => {
+                    if (currentQuiz.resultMode === 'dimension' && opt.scores) {
+                        selectOption(card, opt.scores, e);
+                    } else {
+                        selectOption(card, opt.score, e);
+                    }
+                });
+                // 鼠标跟随光效
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    card.style.setProperty('--glow-x', (e.clientX - rect.left) + 'px');
+                    card.style.setProperty('--glow-y', (e.clientY - rect.top) + 'px');
+                });
+                optionsList.appendChild(card);
+            });
+
+            // 更新按钮文字
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentQuestion === total - 1) {
+                nextBtn.textContent = '提 交 答 案';
+            } else {
+                nextBtn.textContent = '下 一 题';
+            }
+            nextBtn.disabled = true;
+
+            // 添加淡入动画
+            const quizPanel = document.getElementById('quizPanel');
+            quizPanel.classList.remove('fade-enter');
+            void quizPanel.offsetWidth;
+            quizPanel.classList.add('fade-enter');
+        }
+
+        // ============================================
+        // 选择选项（带 ripple + 弹性动画）
+        // ============================================
+        function selectOption(card, scoreData, event) {
+            // 取消其他选中
+            document.querySelectorAll('.option-card').forEach(c => {
+                c.classList.remove('selected', 'bounce-select');
+            });
+
+            // 添加 ripple 水波纹
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            const rect = card.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+            card.appendChild(ripple);
+
+            // 清理 ripple
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+
+            // 选中当前 + 弹性动画
+            card.classList.add('selected', 'bounce-select');
+
+            // 启用按钮
+            document.getElementById('nextBtn').disabled = false;
+
+            // 兼容两种模式
+            if (typeof scoreData === 'object') {
+                answers[currentQuestion] = scoreData; // 多维度模式：{ L: 2, F: 1 }
+            } else {
+                answers[currentQuestion] = scoreData; // 单分数模式：数字
+            }
+        }
+
+        // ============================================
+        // 下一题 / 提交
+        // ============================================
+        function nextQuestion() {
+            if (answers[currentQuestion] === undefined) {
+                showToast('请先选择一个选项', '⚠️');
+                return;
+            }
+
+            if (currentQuestion < shuffledQuiz.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                if (currentQuiz.resultMode === 'dimension') {
+                    showResult(); // 多维度模式不需要算总分
+                } else {
+                    totalScore = answers.reduce((sum, s) => sum + s, 0);
+                    showResult();
+                }
+            }
+        }
+
+        // ============================================
+        // 显示结果
+        // ============================================
+        function showResult() {
+            if (currentQuiz.resultMode === 'dimension') {
+                showDimensionResult();
+            } else {
+                showScoreResult();
+            }
+        }
+
+        function showScoreResult() {
+            const quizResults = currentQuiz ? currentQuiz.results : [];
+            currentResult = quizResults.find(r => totalScore >= r.min && totalScore <= r.max) || quizResults[quizResults.length - 1];
+
+            // 更新进度条到100%
+            document.getElementById('progressBar').style.width = '100%';
+
+            // 更新标题
+            document.getElementById('cardTitle').textContent = currentQuiz ? currentQuiz.name : '测试结果';
+            document.getElementById('cardSubtitle').textContent = '鉴定完成';
+
+            switchPanel('resultPanel');
+
+            // 填充结果数据
+            document.getElementById('resultEmoji').textContent = currentResult.emoji;
+            document.getElementById('resultLevel').textContent = currentResult.level;
+            document.getElementById('resultSubtitle').style.display = 'none';
+            document.getElementById('resultDesc').textContent = currentResult.desc;
+
+            // 分数区域
+            document.querySelector('.result-score-label').textContent = '你的得分';
+            document.getElementById('resultScore').textContent = '0';
+            document.querySelector('.result-score-max').textContent = '满分 100';
+
+            // 分数动画
+            animateScore(totalScore);
+
+            // 发射彩花/纸屑
+            launchConfetti();
+        }
+
+        function showDimensionResult() {
+            // 汇总各维度分数
+            const dimScores = {};
+            currentQuiz.data[0].dimensions.forEach(d => dimScores[d] = 0);
+            answers.forEach(ans => {
+                if (ans && typeof ans === 'object') {
+                    Object.entries(ans).forEach(([dim, val]) => {
+                        dimScores[dim] = (dimScores[dim] || 0) + val;
+                    });
+                }
+            });
+
+            // 找最高分维度
+            let maxDim = null;
+            let maxScore = -Infinity;
+            Object.entries(dimScores).forEach(([dim, score]) => {
+                if (score > maxScore) {
+                    maxScore = score;
+                    maxDim = dim;
+                }
+            });
+
+            // 查找结果
+            currentResult = currentQuiz.results.find(r => r.dimension === maxDim);
+
+            // 更新进度条到100%
+            document.getElementById('progressBar').style.width = '100%';
+
+            // 更新标题
+            document.getElementById('cardTitle').textContent = currentQuiz ? currentQuiz.name : '测试结果';
+            document.getElementById('cardSubtitle').textContent = '鉴定完成';
+
+            switchPanel('resultPanel');
+
+            if (currentResult) {
+                document.getElementById('resultEmoji').textContent = currentResult.emoji;
+                document.getElementById('resultLevel').textContent = currentResult.level;
+                document.getElementById('resultSubtitle').textContent = currentResult.subtitle || '';
+                document.getElementById('resultSubtitle').style.display = 'block';
+                document.getElementById('resultDesc').textContent = currentResult.desc;
+            }
+
+            // 分数区域改为显示维度
+            document.querySelector('.result-score-label').textContent = '你的内心';
+            document.getElementById('resultScore').textContent = '';
+            document.querySelector('.result-score-max').textContent = '';
+
+            // 用维度名做动画
+            animateDimensionName(maxDim, dimScores);
+
+            // 发射彩花/纸屑
+            launchConfetti();
+        }
+
+        // ============================================
+        // 分数计数动画
+        // ============================================
+        function animateScore(target) {
+            const scoreEl = document.getElementById('resultScore');
+            const duration = 1500;
+            const startTime = performance.now();
+            const startVal = 0;
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // easeOutCubic
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = Math.round(startVal + (target - startVal) * eased);
+
+                scoreEl.textContent = current;
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // ============================================
+        // 维度名称滚动动画（多维度模式）
+        // ============================================
+        function animateDimensionName(dim, dimScores) {
+            const scoreEl = document.getElementById('resultScore');
+            const dimNames = { L: '萝莉', Y: '御姐', F: '肥宅', Z: '中二', X: '咸鱼', B: '腹黑', S: '社牛', W: '文艺', P: '暴躁', C: '财迷' };
+            const name = dimNames[dim] || dim;
+            const allDims = Object.keys(dimScores);
+            const duration = 1500;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                if (progress < 0.8) {
+                    // 快速切换显示各维度名
+                    const switchIdx = Math.floor(elapsed / 80) % allDims.length;
+                    scoreEl.textContent = dimNames[allDims[switchIdx]] || allDims[switchIdx];
+                } else {
+                    // 最后阶段停在结果上
+                    scoreEl.textContent = name;
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // ============================================
+        // 重新测试（回到问卷列表）
+        // ============================================
+        function restartQuiz() {
+            goToList();
+            showToast('已重置，再来一次吧！', '🔄');
+        }
+
+        // ============================================
+        // 分享结果（包含问卷名称）
+        // ============================================
+        function shareResult() {
+            if (!currentResult) return;
+
+            const quizName = currentQuiz ? currentQuiz.name : '趣味测试';
+            let shareText;
+            if (currentQuiz.resultMode === 'dimension') {
+                shareText = `我在「${quizName}」中测出内心是${currentResult.emoji} ${currentResult.level}！你也来测测吧~`;
+            } else {
+                shareText = `我在「${quizName}」中获得了${totalScore}分，鉴定结果：${currentResult.emoji} ${currentResult.level}！你也来测测吧~`;
+            }
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showToast('已复制到剪贴板，快去分享吧！', '📋');
+                }).catch(() => {
+                    fallbackCopy(shareText);
+                });
+            } else {
+                fallbackCopy(shareText);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('已复制到剪贴板，快去分享吧！', '📋');
+            } catch (e) {
+                showToast('复制失败，请手动复制', '❌');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // ============================================
+        // 粒子背景系统
+        // ============================================
+        (function initParticles() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            const PARTICLE_COUNT = 50;
+            const CONNECT_DIST = 120;
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            // 粒子颜色池（粉色 + 金色）
+            const colors = [
+                'rgba(232, 160, 180, 0.6)',
+                'rgba(240, 194, 127, 0.6)',
+                'rgba(212, 132, 154, 0.5)',
+                'rgba(255, 182, 193, 0.5)',
+                'rgba(248, 200, 150, 0.5)'
+            ];
+
+            // 初始化粒子
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    r: Math.random() * 2.5 + 1,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // 更新和绘制粒子
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    // 边界反弹
+                    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                    // 绘制粒子
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+
+                    // 绘制连线
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p2 = particles[j];
+                        const dx = p.x - p2.x;
+                        const dy = p.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < CONNECT_DIST) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            const alpha = (1 - dist / CONNECT_DIST) * 0.15;
+                            ctx.strokeStyle = `rgba(232, 160, 180, ${alpha})`;
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        })();
+
+        // ============================================
+        // Confetti 纸屑效果
+        // ============================================
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const confettiColors = [
+                '#E8A0B4', '#F0C27F', '#FFB6C1', '#DDA0DD',
+                '#98FB98', '#87CEEB', '#FFD700', '#FF6B6B',
+                '#C4956A', '#B088D0'
+            ];
+
+            const pieces = [];
+            const PIECE_COUNT = 120;
+
+            for (let i = 0; i < PIECE_COUNT; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height * -1 - 20,
+                    w: Math.random() * 10 + 5,
+                    h: Math.random() * 6 + 3,
+                    color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+                    vy: Math.random() * 3 + 2,
+                    vx: (Math.random() - 0.5) * 2,
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 10,
+                    opacity: 1
+                });
+            }
+
+            const startTime = performance.now();
+            const DURATION = 3000;
+
+            function animateConfetti(currentTime) {
+                const elapsed = currentTime - startTime;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (elapsed > DURATION) {
+                    // 淡出
+                    const fadeProgress = (elapsed - DURATION) / 1000;
+                    if (fadeProgress > 1) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        return;
+                    }
+                }
+
+                let allDone = true;
+                pieces.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.rotation += p.rotSpeed;
+                    p.vx *= 0.99;
+
+                    if (elapsed > DURATION) {
+                        p.opacity = Math.max(0, 1 - (elapsed - DURATION) / 1000);
+                    }
+
+                    if (p.opacity > 0 && p.y < canvas.height + 50) {
+                        allDone = false;
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate(p.rotation * Math.PI / 180);
+                        ctx.globalAlpha = p.opacity;
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                        ctx.restore();
+                    }
+                });
+
+                if (!allDone) {
+                    requestAnimationFrame(animateConfetti);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            requestAnimationFrame(animateConfetti);
+        }
+
+        // ============================================
+        // 卡片鼠标跟随光效
+        // ============================================
+        (function initCardGlow() {
+            const card = document.getElementById('mainCard');
+            const glow = document.getElementById('cardGlow');
+
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                glow.style.setProperty('--glow-x', x + 'px');
+                glow.style.setProperty('--glow-y', y + 'px');
+            });
+        })();
+
+        // ============================================
+        // 初始化
+        // ============================================
+        renderCategories();
+    </script>
+</body>
+</html>
