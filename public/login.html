@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>龟男属性鉴定 - 全国统一卷</title>
+    <title>趣味测试 - 选一个开始吧</title>
     <style>
         /* ========== 全局重置与基础 ========== */
         * {
@@ -22,6 +22,17 @@
             overflow-y: auto;
             position: relative;
             padding: 20px 0;
+        }
+
+        /* ========== 粒子画布 ========== */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
         }
 
         /* ========== 网格背景 ========== */
@@ -139,10 +150,31 @@
             border-radius: 0 0 4px 4px;
         }
 
+        /* ========== 鼠标跟随光效 ========== */
+        .card-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background: radial-gradient(circle 200px at var(--glow-x, 50%) var(--glow-y, 50%), rgba(232, 160, 180, 0.12), transparent);
+        }
+
+        .quiz-card:hover .card-glow {
+            opacity: 1;
+        }
+
         /* ========== 标题区域 ========== */
         .quiz-header {
             text-align: center;
             margin-bottom: 36px;
+            position: relative;
+            z-index: 1;
         }
 
         .quiz-header h1 {
@@ -158,6 +190,45 @@
             color: #C4956A;
             letter-spacing: 2px;
             font-weight: 400;
+        }
+
+        /* ========== 返回首页链接 ========== */
+        .back-home-link {
+            display: inline-block;
+            font-size: 12px;
+            color: #B8A0A8;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: color 0.2s ease;
+            position: relative;
+            z-index: 1;
+            user-select: none;
+        }
+
+        .back-home-link:hover {
+            color: #D4849A;
+        }
+
+        /* ========== 返回按钮 ========== */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #8B7B8B;
+            cursor: pointer;
+            margin-bottom: 24px;
+            transition: color 0.2s ease;
+            background: none;
+            border: none;
+            font-family: inherit;
+            position: relative;
+            z-index: 1;
+            user-select: none;
+        }
+
+        .back-btn:hover {
+            color: #D4849A;
         }
 
         /* ========== 主按钮 ========== */
@@ -181,7 +252,13 @@
 
         .quiz-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 24px rgba(232, 160, 180, 0.45);
+            box-shadow: 0 6px 24px rgba(232, 160, 180, 0.45), 0 0 20px rgba(232, 160, 180, 0.3);
+            animation: btnGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes btnGlow {
+            from { box-shadow: 0 6px 24px rgba(232, 160, 180, 0.45), 0 0 15px rgba(232, 160, 180, 0.2); }
+            to { box-shadow: 0 6px 24px rgba(232, 160, 180, 0.55), 0 0 30px rgba(232, 160, 180, 0.4); }
         }
 
         .quiz-btn:active {
@@ -211,6 +288,7 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: 0 2px 8px rgba(232, 160, 180, 0.2);
+            animation: none;
         }
 
         .quiz-btn:disabled::after {
@@ -236,20 +314,173 @@
         .quiz-btn-outline:hover {
             background: rgba(232, 160, 180, 0.1);
             transform: translateY(-1px);
+            box-shadow: 0 0 15px rgba(232, 160, 180, 0.2);
         }
 
         /* ========== 面板切换 ========== */
         .panel {
             display: none;
+            position: relative;
+            z-index: 1;
         }
         .panel.active {
             display: block;
-            animation: panelFadeIn 0.4s ease-out;
+            animation: panelFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         @keyframes panelFadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: scale(0.92) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* ========== 分类卡片网格 ========== */
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .category-card {
+            background: rgba(255, 248, 240, 0.6);
+            border: 1.5px solid rgba(232, 160, 180, 0.2);
+            border-radius: 12px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(232, 160, 180, 0.1), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .category-card:hover::before {
+            opacity: 1;
+        }
+
+        .category-card:hover {
+            border-color: rgba(232, 160, 180, 0.5);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(232, 160, 180, 0.2);
+        }
+
+        .category-card:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .category-emoji {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .category-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2D2D2D;
+            margin-bottom: 8px;
+        }
+
+        .category-count {
+            display: inline-block;
+            font-size: 11px;
+            color: #D4849A;
+            background: rgba(232, 160, 180, 0.12);
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        /* ========== 问卷列表 ========== */
+        .quiz-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .quiz-item {
+            background: rgba(255, 248, 240, 0.6);
+            border: 1.5px solid rgba(232, 160, 180, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .quiz-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(232, 160, 180, 0.1), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .quiz-item:hover::before {
+            opacity: 1;
+        }
+
+        .quiz-item:hover {
+            border-color: rgba(232, 160, 180, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 160, 180, 0.18);
+        }
+
+        .quiz-item:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .quiz-item-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .quiz-item-emoji {
+            font-size: 32px;
+        }
+
+        .quiz-item-info {
+            flex: 1;
+        }
+
+        .quiz-item-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2D2D2D;
+            margin-bottom: 2px;
+        }
+
+        .quiz-item-meta {
+            font-size: 12px;
+            color: #B8A0A8;
+        }
+
+        .quiz-item-desc {
+            font-size: 13px;
+            color: #8B7B8B;
+            line-height: 1.6;
+            padding-left: 44px;
         }
 
         /* ========== 进度条 ========== */
@@ -276,10 +507,17 @@
 
         .progress-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #E8A0B4, #F0C27F);
+            background: linear-gradient(90deg, #E8A0B4, #F0C27F, #E8A0B4, #F0C27F);
+            background-size: 200% 100%;
             border-radius: 3px;
             transition: width 0.5s ease;
             width: 0%;
+            animation: progressFlow 2s linear infinite;
+        }
+
+        @keyframes progressFlow {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
         }
 
         /* ========== 问题区域 ========== */
@@ -306,12 +544,32 @@
             border-radius: 10px;
             background: rgba(255, 248, 240, 0.5);
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             font-size: 14px;
             line-height: 1.6;
             color: #4A3F4F;
             position: relative;
             user-select: none;
+            overflow: hidden;
+        }
+
+        /* 鼠标跟随光效 */
+        .option-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle 120px at var(--glow-x, 50%) var(--glow-y, 50%), rgba(232, 160, 180, 0.08), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            border-radius: 10px;
+        }
+
+        .option-card:hover::after {
+            opacity: 1;
         }
 
         .option-card:hover {
@@ -325,6 +583,7 @@
             border-color: #E8A0B4;
             background: rgba(232, 160, 180, 0.12);
             box-shadow: 0 2px 12px rgba(232, 160, 180, 0.2);
+            transform: scale(1.02);
         }
 
         .option-card.selected::before {
@@ -336,6 +595,49 @@
             height: 100%;
             background: linear-gradient(180deg, #E8A0B4, #D4849A);
             border-radius: 10px 0 0 10px;
+        }
+
+        /* 水波纹效果 */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(232, 160, 180, 0.3);
+            transform: scale(0);
+            animation: rippleEffect 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes rippleEffect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* 弹性缩放动画 */
+        .option-card.bounce-select {
+            animation: bounceSelect 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes bounceSelect {
+            0% { transform: scale(1); }
+            30% { transform: scale(0.95); }
+            60% { transform: scale(1.04); }
+            100% { transform: scale(1.02); }
+        }
+
+        /* stagger 入场动画 */
+        .option-card.stagger-enter {
+            opacity: 0;
+            transform: translateX(30px);
+            animation: staggerSlideIn 0.35s ease-out forwards;
+        }
+
+        @keyframes staggerSlideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .option-label {
@@ -351,12 +653,13 @@
             font-weight: 700;
             margin-right: 12px;
             flex-shrink: 0;
-            transition: all 0.25s ease;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .option-card.selected .option-label {
             background: linear-gradient(135deg, #E8A0B4, #D4849A);
             color: #FFF;
+            transform: scale(1.15);
         }
 
         .option-content {
@@ -495,8 +798,19 @@
         }
 
         @keyframes fadeEnter {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* ========== Confetti 画布 ========== */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            pointer-events: none;
         }
 
         /* ========== 响应式 ========== */
@@ -513,6 +827,9 @@
             .result-score { font-size: 48px; }
             .result-emoji { font-size: 52px; }
             .home-icon { font-size: 56px; }
+            .category-emoji { font-size: 32px; }
+            .category-card { padding: 18px 12px; }
+            .category-name { font-size: 14px; }
         }
 
         @media (max-width: 380px) {
@@ -522,10 +839,15 @@
             .quiz-header h1 { font-size: 22px; }
             .option-card { padding: 10px 12px; font-size: 12px; }
             .option-label { width: 20px; height: 20px; font-size: 11px; margin-right: 8px; }
+            .category-grid { gap: 10px; }
+            .category-card { padding: 14px 10px; }
         }
     </style>
 </head>
 <body>
+
+    <!-- 粒子画布 -->
+    <canvas id="particleCanvas"></canvas>
 
     <!-- 网格背景 -->
     <div class="grid-bg"></div>
@@ -548,30 +870,44 @@
         <div class="dot" style="width:8px;height:8px;background:#B088D0;top:8%;left:50%;animation-delay:4s;"></div>
     </div>
 
+    <!-- Confetti 画布 -->
+    <canvas id="confettiCanvas"></canvas>
+
     <!-- 卡片 -->
-    <div class="quiz-card">
+    <div class="quiz-card" id="mainCard">
+        <!-- 鼠标跟随光效 -->
+        <div class="card-glow" id="cardGlow"></div>
 
         <!-- 标题 -->
         <div class="quiz-header">
-            <h1 id="cardTitle">龟男属性鉴定</h1>
-            <p class="subtitle" id="cardSubtitle">全国统一卷</p>
+            <h1 id="cardTitle">趣味测试</h1>
+            <p class="subtitle" id="cardSubtitle">选一个分类开始吧</p>
         </div>
 
-        <!-- ====== 首页面板 ====== -->
+        <!-- ====== 首页面板（分类选择） ====== -->
         <div class="panel active" id="homePanel">
             <div style="text-align:center;">
-                <div class="home-icon">🐢</div>
+                <div class="home-icon">✨</div>
                 <div class="home-desc">
-                    本测试共 <strong>20</strong> 道题，每题 <strong>4</strong> 个选项<br>
-                    请根据你的真实反应选择最接近的答案<br>
-                    测试结果仅供娱乐，切勿当真
+                    发现有趣的性格测试<br>
+                    每一份问卷都是一次自我探索的旅程
                 </div>
-                <button class="quiz-btn" onclick="startQuiz()">开 始 答 题</button>
             </div>
+            <div class="category-grid" id="categoryGrid"></div>
+        </div>
+
+        <!-- ====== 问卷列表面板 ====== -->
+        <div class="panel" id="listPanel">
+            <button class="back-btn" onclick="goHome()">
+                <span>←</span>
+                <span>返回</span>
+            </button>
+            <div class="quiz-list" id="quizList"></div>
         </div>
 
         <!-- ====== 答题面板 ====== -->
         <div class="panel" id="quizPanel">
+            <span class="back-home-link" onclick="goToList()">← 返回问卷列表</span>
             <!-- 进度条 -->
             <div class="progress-wrapper">
                 <div class="progress-info">
@@ -595,6 +931,7 @@
 
         <!-- ====== 结果面板 ====== -->
         <div class="panel" id="resultPanel">
+            <span class="back-home-link" onclick="goHome()">← 返回首页</span>
             <div class="result-section">
                 <div class="result-emoji" id="resultEmoji"></div>
                 <div class="result-score-label">你的得分</div>
@@ -619,7 +956,7 @@
 
     <script>
         // ============================================
-        // 题目数据
+        // 题目数据（原封不动保留）
         // ============================================
         const quizData = [
             {
@@ -825,7 +1162,7 @@
         ];
 
         // ============================================
-        // 结果等级
+        // 结果等级（原封不动保留）
         // ============================================
         const results = [
             { min: 0, max: 10, level: "铁血直男 / 正常人类", emoji: "🛡️", desc: `你有着极其健康的自尊心和边界感。在两性关系中，你懂得"先爱自己，再爱别人"。你不仅不是龟男，甚至可能被某些极端女生骂作"直男"或"自私"。继续保持，别被PUA。` },
@@ -836,24 +1173,49 @@
         ];
 
         // ============================================
+        // 分类数据（可扩展）
+        // ============================================
+        const categories = [
+            {
+                id: 'personality',
+                name: '性格测试',
+                emoji: '🎭',
+                quizzes: [
+                    {
+                        id: 'guinan',
+                        name: '龟男属性鉴定',
+                        emoji: '🐢',
+                        desc: '全国统一卷 · 20题',
+                        data: quizData,
+                        results: results
+                    }
+                ]
+            }
+        ];
+
+        // ============================================
         // 状态管理
         // ============================================
         let currentQuestion = 0;
         let shuffledQuiz = [];
-        let answers = []; // 存储每题选择的分数
+        let answers = [];
         let totalScore = 0;
         let currentResult = null;
+        let currentQuiz = null; // 当前选中的问卷对象
+        let currentCategory = null; // 当前选中的分类对象
 
         const optionLabels = ['A', 'B', 'C', 'D'];
 
         // ============================================
-        // Toast 提示
+        // Toast 提示（带emoji）
         // ============================================
         let toastTimer = null;
-        function showToast(message) {
+        function showToast(message, icon) {
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
             toastMsg.textContent = message;
+            toastIcon.textContent = icon || '💬';
             toast.classList.add('show');
             clearTimeout(toastTimer);
             toastTimer = setTimeout(() => {
@@ -874,24 +1236,127 @@
         }
 
         // ============================================
-        // 面板切换
+        // 面板切换（scale + fade 组合）
         // ============================================
         function switchPanel(panelId) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.getElementById(panelId).classList.add('active');
+            const panels = document.querySelectorAll('.panel');
+            panels.forEach(p => {
+                p.classList.remove('active');
+            });
+            // 用 requestAnimationFrame 确保动画触发
+            requestAnimationFrame(() => {
+                document.getElementById(panelId).classList.add('active');
+            });
+        }
+
+        // ============================================
+        // 渲染首页分类网格
+        // ============================================
+        function renderCategories() {
+            const grid = document.getElementById('categoryGrid');
+            grid.innerHTML = '';
+            categories.forEach((cat, idx) => {
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                card.setAttribute('role', 'button');
+                card.setAttribute('tabindex', '0');
+                card.style.animationDelay = (idx * 0.1) + 's';
+                card.innerHTML = `
+                    <span class="category-emoji">${cat.emoji}</span>
+                    <div class="category-name">${cat.name}</div>
+                    <span class="category-count">${cat.quizzes.length} 个问卷</span>
+                `;
+                card.addEventListener('click', () => openCategory(cat));
+                // 鼠标跟随光效
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    card.style.setProperty('--glow-x', (e.clientX - rect.left) + 'px');
+                    card.style.setProperty('--glow-y', (e.clientY - rect.top) + 'px');
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        // ============================================
+        // 打开分类（进入问卷列表）
+        // ============================================
+        function openCategory(cat) {
+            currentCategory = cat;
+            document.getElementById('cardTitle').textContent = cat.name;
+            document.getElementById('cardSubtitle').textContent = `共 ${cat.quizzes.length} 个问卷`;
+            renderQuizList(cat);
+            switchPanel('listPanel');
+        }
+
+        // ============================================
+        // 渲染问卷列表
+        // ============================================
+        function renderQuizList(cat) {
+            const list = document.getElementById('quizList');
+            list.innerHTML = '';
+            cat.quizzes.forEach((quiz, idx) => {
+                const item = document.createElement('div');
+                item.className = 'quiz-item';
+                item.setAttribute('role', 'button');
+                item.setAttribute('tabindex', '0');
+                item.style.animationDelay = (idx * 0.1) + 's';
+                item.innerHTML = `
+                    <div class="quiz-item-header">
+                        <span class="quiz-item-emoji">${quiz.emoji}</span>
+                        <div class="quiz-item-info">
+                            <div class="quiz-item-name">${quiz.name}</div>
+                            <div class="quiz-item-meta">${quiz.desc}</div>
+                        </div>
+                    </div>
+                `;
+                item.addEventListener('click', () => startQuiz(quiz));
+                // 鼠标跟随光效
+                item.addEventListener('mousemove', (e) => {
+                    const rect = item.getBoundingClientRect();
+                    item.style.setProperty('--glow-x', (e.clientX - rect.left) + 'px');
+                    item.style.setProperty('--glow-y', (e.clientY - rect.top) + 'px');
+                });
+                list.appendChild(item);
+            });
+        }
+
+        // ============================================
+        // 返回首页
+        // ============================================
+        function goHome() {
+            document.getElementById('cardTitle').textContent = '趣味测试';
+            document.getElementById('cardSubtitle').textContent = '选一个分类开始吧';
+            switchPanel('homePanel');
+        }
+
+        // ============================================
+        // 返回问卷列表
+        // ============================================
+        function goToList() {
+            if (currentCategory) {
+                document.getElementById('cardTitle').textContent = currentCategory.name;
+                document.getElementById('cardSubtitle').textContent = `共 ${currentCategory.quizzes.length} 个问卷`;
+                switchPanel('listPanel');
+            } else {
+                goHome();
+            }
         }
 
         // ============================================
         // 开始测试
         // ============================================
-        function startQuiz() {
+        function startQuiz(quiz) {
+            currentQuiz = quiz;
             currentQuestion = 0;
             answers = [];
             totalScore = 0;
             currentResult = null;
 
+            document.getElementById('cardTitle').textContent = quiz.name;
+            document.getElementById('cardSubtitle').textContent = quiz.desc;
+
             // 深拷贝并打乱每题的选项顺序
-            shuffledQuiz = quizData.map(q => ({
+            shuffledQuiz = quiz.data.map(q => ({
                 ...q,
                 options: shuffleArray(q.options)
             }));
@@ -901,7 +1366,7 @@
         }
 
         // ============================================
-        // 渲染当前问题
+        // 渲染当前问题（带 stagger 动画）
         // ============================================
         function renderQuestion() {
             const q = shuffledQuiz[currentQuestion];
@@ -916,13 +1381,14 @@
             // 更新问题文本
             document.getElementById('questionText').textContent = q.question;
 
-            // 渲染选项
+            // 渲染选项（stagger 入场）
             const optionsList = document.getElementById('optionsList');
             optionsList.innerHTML = '';
 
             q.options.forEach((opt, idx) => {
                 const card = document.createElement('div');
-                card.className = 'option-card';
+                card.className = 'option-card stagger-enter';
+                card.style.animationDelay = (idx * 0.05) + 's';
                 card.setAttribute('data-score', opt.score);
                 card.innerHTML = `
                     <div class="option-content">
@@ -930,7 +1396,13 @@
                         <span class="option-text">${opt.text}</span>
                     </div>
                 `;
-                card.addEventListener('click', () => selectOption(card, opt.score));
+                card.addEventListener('click', (e) => selectOption(card, opt.score, e));
+                // 鼠标跟随光效
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    card.style.setProperty('--glow-x', (e.clientX - rect.left) + 'px');
+                    card.style.setProperty('--glow-y', (e.clientY - rect.top) + 'px');
+                });
                 optionsList.appendChild(card);
             });
 
@@ -946,20 +1418,40 @@
             // 添加淡入动画
             const quizPanel = document.getElementById('quizPanel');
             quizPanel.classList.remove('fade-enter');
-            void quizPanel.offsetWidth; // 触发 reflow
+            void quizPanel.offsetWidth;
             quizPanel.classList.add('fade-enter');
         }
 
         // ============================================
-        // 选择选项
+        // 选择选项（带 ripple + 弹性动画）
         // ============================================
-        function selectOption(card, score) {
+        function selectOption(card, score, event) {
             // 取消其他选中
-            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-            // 选中当前
-            card.classList.add('selected');
+            document.querySelectorAll('.option-card').forEach(c => {
+                c.classList.remove('selected', 'bounce-select');
+            });
+
+            // 添加 ripple 水波纹
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            const rect = card.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+            card.appendChild(ripple);
+
+            // 清理 ripple
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+
+            // 选中当前 + 弹性动画
+            card.classList.add('selected', 'bounce-select');
+
             // 启用按钮
             document.getElementById('nextBtn').disabled = false;
+
             // 存储当前选择
             answers[currentQuestion] = score;
         }
@@ -969,7 +1461,7 @@
         // ============================================
         function nextQuestion() {
             if (answers[currentQuestion] === undefined) {
-                showToast('请先选择一个选项');
+                showToast('请先选择一个选项', '⚠️');
                 return;
             }
 
@@ -987,11 +1479,15 @@
         // 显示结果
         // ============================================
         function showResult() {
-            // 找到对应等级
-            currentResult = results.find(r => totalScore >= r.min && totalScore <= r.max) || results[results.length - 1];
+            const quizResults = currentQuiz ? currentQuiz.results : results;
+            currentResult = quizResults.find(r => totalScore >= r.min && totalScore <= r.max) || quizResults[quizResults.length - 1];
 
             // 更新进度条到100%
             document.getElementById('progressBar').style.width = '100%';
+
+            // 更新标题
+            document.getElementById('cardTitle').textContent = currentQuiz ? currentQuiz.name : '测试结果';
+            document.getElementById('cardSubtitle').textContent = '鉴定完成';
 
             switchPanel('resultPanel');
 
@@ -1002,6 +1498,9 @@
 
             // 分数动画
             animateScore(totalScore);
+
+            // 发射彩花/纸屑
+            launchConfetti();
         }
 
         // ============================================
@@ -1032,23 +1531,25 @@
         }
 
         // ============================================
-        // 重新测试
+        // 重新测试（回到问卷列表）
         // ============================================
         function restartQuiz() {
-            switchPanel('homePanel');
+            goToList();
+            showToast('已重置，再来一次吧！', '🔄');
         }
 
         // ============================================
-        // 分享结果
+        // 分享结果（包含问卷名称）
         // ============================================
         function shareResult() {
             if (!currentResult) return;
 
-            const shareText = `我在龟男属性鉴定中获得了${totalScore}分，鉴定结果：${currentResult.emoji} ${currentResult.level}！你也来测测吧~`;
+            const quizName = currentQuiz ? currentQuiz.name : '趣味测试';
+            const shareText = `我在「${quizName}」中获得了${totalScore}分，鉴定结果：${currentResult.emoji} ${currentResult.level}！你也来测测吧~`;
 
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(shareText).then(() => {
-                    showToast('已复制到剪贴板，快去分享吧！');
+                    showToast('已复制到剪贴板，快去分享吧！', '📋');
                 }).catch(() => {
                     fallbackCopy(shareText);
                 });
@@ -1066,12 +1567,196 @@
             textarea.select();
             try {
                 document.execCommand('copy');
-                showToast('已复制到剪贴板，快去分享吧！');
+                showToast('已复制到剪贴板，快去分享吧！', '📋');
             } catch (e) {
-                showToast('复制失败，请手动复制');
+                showToast('复制失败，请手动复制', '❌');
             }
             document.body.removeChild(textarea);
         }
+
+        // ============================================
+        // 粒子背景系统
+        // ============================================
+        (function initParticles() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            const PARTICLE_COUNT = 50;
+            const CONNECT_DIST = 120;
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            // 粒子颜色池（粉色 + 金色）
+            const colors = [
+                'rgba(232, 160, 180, 0.6)',
+                'rgba(240, 194, 127, 0.6)',
+                'rgba(212, 132, 154, 0.5)',
+                'rgba(255, 182, 193, 0.5)',
+                'rgba(248, 200, 150, 0.5)'
+            ];
+
+            // 初始化粒子
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    r: Math.random() * 2.5 + 1,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // 更新和绘制粒子
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    // 边界反弹
+                    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                    // 绘制粒子
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+
+                    // 绘制连线
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const p2 = particles[j];
+                        const dx = p.x - p2.x;
+                        const dy = p.y - p2.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < CONNECT_DIST) {
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p2.x, p2.y);
+                            const alpha = (1 - dist / CONNECT_DIST) * 0.15;
+                            ctx.strokeStyle = `rgba(232, 160, 180, ${alpha})`;
+                            ctx.lineWidth = 0.8;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        })();
+
+        // ============================================
+        // Confetti 纸屑效果
+        // ============================================
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const confettiColors = [
+                '#E8A0B4', '#F0C27F', '#FFB6C1', '#DDA0DD',
+                '#98FB98', '#87CEEB', '#FFD700', '#FF6B6B',
+                '#C4956A', '#B088D0'
+            ];
+
+            const pieces = [];
+            const PIECE_COUNT = 120;
+
+            for (let i = 0; i < PIECE_COUNT; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height * -1 - 20,
+                    w: Math.random() * 10 + 5,
+                    h: Math.random() * 6 + 3,
+                    color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+                    vy: Math.random() * 3 + 2,
+                    vx: (Math.random() - 0.5) * 2,
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 10,
+                    opacity: 1
+                });
+            }
+
+            const startTime = performance.now();
+            const DURATION = 3000;
+
+            function animateConfetti(currentTime) {
+                const elapsed = currentTime - startTime;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (elapsed > DURATION) {
+                    // 淡出
+                    const fadeProgress = (elapsed - DURATION) / 1000;
+                    if (fadeProgress > 1) {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        return;
+                    }
+                }
+
+                let allDone = true;
+                pieces.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.rotation += p.rotSpeed;
+                    p.vx *= 0.99;
+
+                    if (elapsed > DURATION) {
+                        p.opacity = Math.max(0, 1 - (elapsed - DURATION) / 1000);
+                    }
+
+                    if (p.opacity > 0 && p.y < canvas.height + 50) {
+                        allDone = false;
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate(p.rotation * Math.PI / 180);
+                        ctx.globalAlpha = p.opacity;
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                        ctx.restore();
+                    }
+                });
+
+                if (!allDone) {
+                    requestAnimationFrame(animateConfetti);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            requestAnimationFrame(animateConfetti);
+        }
+
+        // ============================================
+        // 卡片鼠标跟随光效
+        // ============================================
+        (function initCardGlow() {
+            const card = document.getElementById('mainCard');
+            const glow = document.getElementById('cardGlow');
+
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                glow.style.setProperty('--glow-x', x + 'px');
+                glow.style.setProperty('--glow-y', y + 'px');
+            });
+        })();
+
+        // ============================================
+        // 初始化
+        // ============================================
+        renderCategories();
     </script>
 </body>
 </html>
