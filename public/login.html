@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录 / 注册</title>
+    <title>龟男属性鉴定 - 全国统一卷</title>
     <style>
         /* ========== 全局重置与基础 ========== */
         * {
@@ -18,8 +18,10 @@
             align-items: center;
             justify-content: center;
             font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             position: relative;
+            padding: 20px 0;
         }
 
         /* ========== 网格背景 ========== */
@@ -102,11 +104,11 @@
         }
 
         /* ========== 卡片容器 ========== */
-        .login-card {
+        .quiz-card {
             position: relative;
             z-index: 10;
-            width: 420px;
-            max-width: 90vw;
+            width: 520px;
+            max-width: 92vw;
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -125,7 +127,7 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .login-card::before {
+        .quiz-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -138,12 +140,12 @@
         }
 
         /* ========== 标题区域 ========== */
-        .login-header {
+        .quiz-header {
             text-align: center;
             margin-bottom: 36px;
         }
 
-        .login-header h1 {
+        .quiz-header h1 {
             font-size: 28px;
             font-weight: 700;
             color: #2D2D2D;
@@ -151,151 +153,15 @@
             margin-bottom: 8px;
         }
 
-        .login-header .subtitle {
+        .quiz-header .subtitle {
             font-size: 13px;
             color: #C4956A;
             letter-spacing: 2px;
             font-weight: 400;
         }
 
-        /* ========== 表单区域 ========== */
-        .form-group {
-            margin-bottom: 22px;
-            position: relative;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: #6B5B73;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 14px;
-            width: 18px;
-            height: 18px;
-            opacity: 0.5;
-            transition: opacity 0.3s;
-        }
-
-        .form-group:focus-within .input-icon {
-            opacity: 0.9;
-        }
-
-        .form-input {
-            width: 100%;
-            height: 48px;
-            padding: 0 16px 0 44px;
-            font-size: 15px;
-            color: #333;
-            background: rgba(255, 248, 240, 0.6);
-            border: 1.5px solid rgba(232, 160, 180, 0.35);
-            border-radius: 10px;
-            outline: none;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        .form-input::placeholder {
-            color: #C4B0A0;
-            font-size: 13px;
-        }
-
-        .form-input:focus {
-            border-color: #E8A0B4;
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 0 0 3px rgba(232, 160, 180, 0.15);
-        }
-
-        .input-status {
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 2px;
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus ~ .input-status {
-            width: 60%;
-        }
-
-        .input-status.idle { background: #E8A0B4; }
-        .input-status.valid { background: #6BCB77; }
-        .input-status.invalid { background: #E74C3C; }
-
-        /* ========== 选项行 ========== */
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 28px;
-            font-size: 13px;
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            color: #8B7B8B;
-            user-select: none;
-        }
-
-        .remember-me input[type="checkbox"] {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border: 1.5px solid #D4B8C8;
-            border-radius: 4px;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        .remember-me input[type="checkbox"]:checked {
-            background: #E8A0B4;
-            border-color: #E8A0B4;
-        }
-
-        .remember-me input[type="checkbox"]:checked::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .forgot-link {
-            color: #C4956A;
-            text-decoration: none;
-            transition: color 0.2s;
-            cursor: pointer;
-        }
-
-        .forgot-link:hover {
-            color: #A87A55;
-            text-decoration: underline;
-        }
-
         /* ========== 主按钮 ========== */
-        .login-btn {
+        .quiz-btn {
             width: 100%;
             height: 50px;
             font-size: 16px;
@@ -310,19 +176,20 @@
             overflow: hidden;
             transition: all 0.3s ease;
             box-shadow: 0 4px 16px rgba(232, 160, 180, 0.35);
+            font-family: inherit;
         }
 
-        .login-btn:hover {
+        .quiz-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 24px rgba(232, 160, 180, 0.45);
         }
 
-        .login-btn:active {
+        .quiz-btn:active {
             transform: translateY(0);
             box-shadow: 0 2px 8px rgba(232, 160, 180, 0.3);
         }
 
-        .login-btn::after {
+        .quiz-btn::after {
             content: '';
             position: absolute;
             top: -50%;
@@ -339,79 +206,257 @@
             50% { left: 120%; }
         }
 
-        /* ========== 分割线 ========== */
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 28px 0;
-            gap: 12px;
+        .quiz-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 8px rgba(232, 160, 180, 0.2);
         }
 
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(232, 160, 180, 0.4), transparent);
+        .quiz-btn:disabled::after {
+            display: none;
         }
 
-        .divider span {
-            font-size: 12px;
-            color: #B8A0A8;
-            white-space: nowrap;
-        }
-
-        /* ========== 第三方登录 ========== */
-        .social-login {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .social-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: 1.5px solid rgba(232, 160, 180, 0.3);
-            background: rgba(255, 248, 240, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* ========== 次要按钮（分享等） ========== */
+        .quiz-btn-outline {
+            width: 100%;
+            height: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            color: #D4849A;
+            background: transparent;
+            border: 1.5px solid #E8A0B4;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-family: inherit;
         }
 
-        .social-btn:hover {
-            border-color: #E8A0B4;
+        .quiz-btn-outline:hover {
             background: rgba(232, 160, 180, 0.1);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(232, 160, 180, 0.2);
+            transform: translateY(-1px);
         }
 
-        .social-btn svg {
-            width: 20px;
-            height: 20px;
+        /* ========== 面板切换 ========== */
+        .panel {
+            display: none;
+        }
+        .panel.active {
+            display: block;
+            animation: panelFadeIn 0.4s ease-out;
         }
 
-        /* ========== 底部提示 ========== */
-        .signup-hint {
-            text-align: center;
-            margin-top: 24px;
+        @keyframes panelFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== 进度条 ========== */
+        .progress-wrapper {
+            margin-bottom: 28px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
             font-size: 13px;
             color: #8B7B8B;
         }
 
-        .signup-hint a {
-            color: #C4956A;
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: color 0.2s;
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(232, 160, 180, 0.15);
+            border-radius: 3px;
+            overflow: hidden;
         }
 
-        .signup-hint a:hover {
-            color: #A87A55;
-            text-decoration: underline;
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #E8A0B4, #F0C27F);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        /* ========== 问题区域 ========== */
+        .question-text {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #2D2D2D;
+            margin-bottom: 24px;
+            font-weight: 500;
+            min-height: 54px;
+        }
+
+        /* ========== 选项卡片 ========== */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .option-card {
+            padding: 14px 18px;
+            border: 1.5px solid rgba(232, 160, 180, 0.25);
+            border-radius: 10px;
+            background: rgba(255, 248, 240, 0.5);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #4A3F4F;
+            position: relative;
+            user-select: none;
+        }
+
+        .option-card:hover {
+            border-color: rgba(232, 160, 180, 0.5);
+            background: rgba(255, 248, 240, 0.8);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(232, 160, 180, 0.15);
+        }
+
+        .option-card.selected {
+            border-color: #E8A0B4;
+            background: rgba(232, 160, 180, 0.12);
+            box-shadow: 0 2px 12px rgba(232, 160, 180, 0.2);
+        }
+
+        .option-card.selected::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #E8A0B4, #D4849A);
+            border-radius: 10px 0 0 10px;
+        }
+
+        .option-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(232, 160, 180, 0.15);
+            color: #D4849A;
+            font-size: 12px;
+            font-weight: 700;
+            margin-right: 12px;
+            flex-shrink: 0;
+            transition: all 0.25s ease;
+        }
+
+        .option-card.selected .option-label {
+            background: linear-gradient(135deg, #E8A0B4, #D4849A);
+            color: #FFF;
+        }
+
+        .option-content {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .option-text {
+            flex: 1;
+        }
+
+        /* ========== 结果页 ========== */
+        .result-section {
+            text-align: center;
+        }
+
+        .result-emoji {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: resultBounce 0.6s ease-out;
+        }
+
+        @keyframes resultBounce {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .result-score-label {
+            font-size: 13px;
+            color: #8B7B8B;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+        }
+
+        .result-score {
+            font-size: 56px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #E8A0B4, #D4849A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        .result-score-max {
+            font-size: 14px;
+            color: #B8A0A8;
+            margin-bottom: 16px;
+        }
+
+        .result-level {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2D2D2D;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .result-desc {
+            font-size: 14px;
+            line-height: 1.8;
+            color: #6B5B73;
+            text-align: left;
+            background: rgba(255, 248, 240, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(232, 160, 180, 0.15);
+        }
+
+        .result-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* ========== 首页装饰 ========== */
+        .home-icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+            animation: homeFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes homeFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .home-desc {
+            font-size: 13px;
+            color: #8B7B8B;
+            line-height: 1.8;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .home-desc strong {
+            color: #D4849A;
         }
 
         /* ========== Toast 提示 ========== */
@@ -444,114 +489,39 @@
             font-size: 18px;
         }
 
-        /* ========== 登录/注册面板切换 ========== */
-        .form-panel {
-            display: none;
-        }
-        .form-panel.active {
-            display: block;
-            animation: panelFadeIn 0.4s ease-out;
+        /* ========== 淡入淡出动画 ========== */
+        .fade-enter {
+            animation: fadeEnter 0.35s ease-out;
         }
 
-        @keyframes panelFadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ========== 登录成功后的欢迎面板 ========== */
-        .welcome-panel {
-            display: none;
-            text-align: center;
-            padding: 20px 0;
-        }
-        .welcome-panel.active {
-            display: block;
-            animation: panelFadeIn 0.5s ease-out;
-        }
-
-        .welcome-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #E8A0B4, #F0C27F);
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            color: white;
-            box-shadow: 0 4px 16px rgba(232, 160, 180, 0.3);
-        }
-
-        .welcome-panel h2 {
-            font-size: 22px;
-            color: #2D2D2D;
-            margin-bottom: 8px;
-        }
-
-        .welcome-panel p {
-            font-size: 14px;
-            color: #8B7B8B;
-            margin-bottom: 6px;
-        }
-
-        .welcome-panel .user-info {
-            background: rgba(255, 248, 240, 0.6);
-            border-radius: 10px;
-            padding: 16px;
-            margin: 20px 0;
-            text-align: left;
-        }
-
-        .welcome-panel .user-info .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            font-size: 13px;
-            border-bottom: 1px solid rgba(232, 160, 180, 0.15);
-        }
-
-        .welcome-panel .user-info .info-row:last-child {
-            border-bottom: none;
-        }
-
-        .welcome-panel .user-info .info-label {
-            color: #8B7B8B;
-        }
-
-        .welcome-panel .user-info .info-value {
-            color: #2D2D2D;
-            font-weight: 500;
-        }
-
-        .logout-btn {
-            width: 100%;
-            height: 46px;
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: 4px;
-            color: #D4849A;
-            background: transparent;
-            border: 1.5px solid #E8A0B4;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 16px;
-        }
-
-        .logout-btn:hover {
-            background: rgba(232, 160, 180, 0.1);
-            transform: translateY(-1px);
+        @keyframes fadeEnter {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         /* ========== 响应式 ========== */
-        @media (max-width: 480px) {
-            .login-card {
+        @media (max-width: 560px) {
+            .quiz-card {
                 padding: 36px 24px 32px;
                 margin: 16px;
             }
-            .login-header h1 { font-size: 24px; }
-            .login-btn { height: 46px; font-size: 15px; }
+            .quiz-header h1 { font-size: 24px; letter-spacing: 2px; }
+            .quiz-btn { height: 46px; font-size: 15px; letter-spacing: 4px; }
+            .quiz-btn-outline { height: 46px; font-size: 15px; }
+            .question-text { font-size: 15px; }
+            .option-card { padding: 12px 14px; font-size: 13px; }
+            .result-score { font-size: 48px; }
+            .result-emoji { font-size: 52px; }
+            .home-icon { font-size: 56px; }
+        }
+
+        @media (max-width: 380px) {
+            .quiz-card {
+                padding: 28px 18px 24px;
+            }
+            .quiz-header h1 { font-size: 22px; }
+            .option-card { padding: 10px 12px; font-size: 12px; }
+            .option-label { width: 20px; height: 20px; font-size: 11px; margin-right: 8px; }
         }
     </style>
 </head>
@@ -579,156 +549,66 @@
     </div>
 
     <!-- 卡片 -->
-    <div class="login-card">
+    <div class="quiz-card">
+
         <!-- 标题 -->
-        <div class="login-header">
-            <h1 id="cardTitle">登 录</h1>
-            <p class="subtitle" id="cardSubtitle">欢迎回来，请登录你的账号</p>
+        <div class="quiz-header">
+            <h1 id="cardTitle">龟男属性鉴定</h1>
+            <p class="subtitle" id="cardSubtitle">全国统一卷</p>
         </div>
 
-        <!-- ====== 登录面板 ====== -->
-        <div class="form-panel active" id="loginPanel">
-            <form id="loginForm" onsubmit="return false;">
-                <div class="form-group">
-                    <label for="loginUsername">用户名</label>
-                    <div class="input-wrapper">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#8B7B8B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                        <input type="text" id="loginUsername" class="form-input" placeholder="请输入用户名" autocomplete="username">
-                        <div class="input-status idle"></div>
-                    </div>
+        <!-- ====== 首页面板 ====== -->
+        <div class="panel active" id="homePanel">
+            <div style="text-align:center;">
+                <div class="home-icon">🐢</div>
+                <div class="home-desc">
+                    本测试共 <strong>20</strong> 道题，每题 <strong>4</strong> 个选项<br>
+                    请根据你的真实反应选择最接近的答案<br>
+                    测试结果仅供娱乐，切勿当真
                 </div>
-
-                <div class="form-group">
-                    <label for="loginPassword">密码</label>
-                    <div class="input-wrapper">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#8B7B8B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
-                        <input type="password" id="loginPassword" class="form-input" placeholder="请输入密码" autocomplete="current-password">
-                        <div class="input-status idle"></div>
-                    </div>
-                </div>
-
-                <div class="form-options">
-                    <label class="remember-me">
-                        <input type="checkbox" id="remember">
-                        <span>记住密码</span>
-                    </label>
-                    <a class="forgot-link" onclick="showToast('💡 该功能暂未开放')">忘记密码？</a>
-                </div>
-
-                <button type="submit" class="login-btn" id="loginBtn" onclick="handleLogin()">登 录</button>
-            </form>
-
-            <div class="divider"><span>其他登录方式</span></div>
-
-            <div class="social-login">
-                <div class="social-btn" onclick="showToast('💬 微信登录暂未开放')" title="微信登录">
-                    <svg viewBox="0 0 24 24" fill="#07C160"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-7.062-6.122zM14.51 13.17c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982z"/></svg>
-                </div>
-                <div class="social-btn" onclick="showToast('🐧 QQ登录暂未开放')" title="QQ登录">
-                    <svg viewBox="0 0 24 24" fill="#12B7F5"><path d="M12.003 2c-2.265 0-6.29 1.364-6.29 7.325v1.195S3.55 14.96 3.55 17.474c0 .665.17 1.025.396 1.025.116 0 .263-.073.42-.216-.156.563-.26 1.093-.26 1.54 0 .936.393 1.262.795 1.262.312 0 .652-.18 1.012-.498a5.09 5.09 0 0 0 .897 1.14c.7.678 1.573 1.073 2.448 1.073h5.588c.875 0 1.748-.395 2.448-1.073a5.09 5.09 0 0 0 .897-1.14c.36.318.7.498 1.012.498.402 0 .795-.326.795-1.262 0-.447-.104-.977-.26-1.54.157.143.304.216.42.216.226 0 .396-.36.396-1.025 0-2.514-2.163-6.954-2.163-6.954V9.325C18.293 3.364 14.268 2 12.003 2z"/></svg>
-                </div>
-                <div class="social-btn" onclick="showToast('🔴 微博登录暂未开放')" title="微博登录">
-                    <svg viewBox="0 0 24 24" fill="#E6162D"><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.739 5.443zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.583.631.283.822.985.442 1.574zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.307-.361-.164-.585.14-.227.436-.346.672-.24.239.09.315.36.181.572zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.642 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zM17.014 2.575c.085-.072.245-.156.348-.131.268.066.386.378.266.662l-.006.014c-.077.18-.173.357-.285.526-.325.493-.785.874-1.312 1.126-.09.043-.18.082-.274.116-.058.021-.12.041-.184.055-.096.021-.196.031-.296.031-.272 0-.534-.085-.757-.247-.083-.06-.161-.128-.231-.204-.038-.042-.073-.087-.104-.134-.047-.07-.087-.144-.12-.222-.014-.033-.026-.067-.036-.102-.018-.064-.029-.13-.033-.197-.003-.048-.003-.096.001-.143.009-.108.04-.21.089-.303.038-.073.086-.14.143-.199.056-.057.12-.106.191-.145.07-.039.145-.068.224-.087.077-.018.157-.027.237-.027.078 0 .155.009.23.027.074.018.145.047.21.085.066.038.126.085.179.14.053.054.098.115.135.181.037.066.066.137.086.211.02.074.03.151.03.229 0 .079-.01.157-.03.234-.021.078-.053.152-.095.22-.041.068-.092.13-.151.184-.06.054-.126.1-.198.136-.072.036-.149.062-.229.077-.08.015-.162.02-.244.014-.083-.006-.164-.022-.241-.049-.078-.027-.151-.064-.218-.111-.067-.047-.128-.103-.18-.167-.053-.064-.097-.135-.132-.211-.035-.076-.06-.157-.075-.24-.015-.084-.019-.169-.013-.254.006-.086.022-.17.049-.251.027-.081.064-.158.111-.229.047-.071.103-.136.167-.192.064-.056.135-.103.211-.14.077-.037.158-.064.242-.08.084-.016.17-.021.256-.015.086.006.17.023.251.05.082.027.159.065.23.112.071.047.136.104.193.168.057.065.105.137.143.214.038.077.066.159.083.244.017.085.022.172.015.259-.006.087-.023.173-.051.256-.028.083-.066.162-.114.235-.048.073-.105.14-.17.199-.065.059-.137.109-.215.149-.078.04-.161.07-.247.088-.087.018-.176.024-.264.018-.089-.006-.176-.024-.259-.053-.083-.029-.162-.068-.234-.117-.072-.049-.138-.107-.195-.173-.058-.066-.106-.14-.144-.219-.038-.079-.066-.163-.083-.25-.017-.087-.023-.176-.017-.264z"/></svg>
-                </div>
-                <div class="social-btn" onclick="showToast('🐱 GitHub登录暂未开放')" title="GitHub登录">
-                    <svg viewBox="0 0 24 24" fill="#333"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
-                </div>
-            </div>
-
-            <div class="signup-hint">
-                还没有账号？<a onclick="switchPanel('register')">立即注册</a>
+                <button class="quiz-btn" onclick="startQuiz()">开 始 答 题</button>
             </div>
         </div>
 
-        <!-- ====== 注册面板 ====== -->
-        <div class="form-panel" id="registerPanel">
-            <form id="registerForm" onsubmit="return false;">
-                <div class="form-group">
-                    <label for="regUsername">用户名</label>
-                    <div class="input-wrapper">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#8B7B8B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                        <input type="text" id="regUsername" class="form-input" placeholder="3-20个字符" autocomplete="username">
-                        <div class="input-status idle"></div>
-                    </div>
+        <!-- ====== 答题面板 ====== -->
+        <div class="panel" id="quizPanel">
+            <!-- 进度条 -->
+            <div class="progress-wrapper">
+                <div class="progress-info">
+                    <span id="progressText">1 / 20</span>
+                    <span id="progressPercent">5%</span>
                 </div>
-
-                <div class="form-group">
-                    <label for="regEmail">邮箱（选填）</label>
-                    <div class="input-wrapper">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#8B7B8B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                            <polyline points="22,6 12,13 2,6"/>
-                        </svg>
-                        <input type="email" id="regEmail" class="form-input" placeholder="your@email.com" autocomplete="email">
-                        <div class="input-status idle"></div>
-                    </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBar"></div>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label for="regPassword">密码</label>
-                    <div class="input-wrapper">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#8B7B8B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                        </svg>
-                        <input type="password" id="regPassword" class="form-input" placeholder="至少6位密码" autocomplete="new-password">
-                        <div class="input-status idle"></div>
-                    </div>
+            <!-- 问题 -->
+            <div class="question-text" id="questionText"></div>
+
+            <!-- 选项 -->
+            <div class="options-list" id="optionsList"></div>
+
+            <!-- 下一题按钮 -->
+            <button class="quiz-btn" id="nextBtn" disabled onclick="nextQuestion()">下 一 题</button>
+        </div>
+
+        <!-- ====== 结果面板 ====== -->
+        <div class="panel" id="resultPanel">
+            <div class="result-section">
+                <div class="result-emoji" id="resultEmoji"></div>
+                <div class="result-score-label">你的得分</div>
+                <div class="result-score" id="resultScore">0</div>
+                <div class="result-score-max">满分 100</div>
+                <div class="result-level" id="resultLevel"></div>
+                <div class="result-desc" id="resultDesc"></div>
+                <div class="result-buttons">
+                    <button class="quiz-btn" onclick="restartQuiz()">重 新 测 试</button>
+                    <button class="quiz-btn-outline" onclick="shareResult()">分 享 结 果</button>
                 </div>
-
-                <div class="form-group">
-                    <label for="regConfirm">确认密码</label>
-                    <div class="input-wrapper">
-                        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#8B7B8B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        </svg>
-                        <input type="password" id="regConfirm" class="form-input" placeholder="再次输入密码" autocomplete="new-password">
-                        <div class="input-status idle"></div>
-                    </div>
-                </div>
-
-                <button type="submit" class="login-btn" id="registerBtn" onclick="handleRegister()" style="margin-top: 8px;">注 册</button>
-            </form>
-
-            <div class="signup-hint" style="margin-top: 20px;">
-                已有账号？<a onclick="switchPanel('login')">返回登录</a>
             </div>
         </div>
 
-        <!-- ====== 欢迎面板（登录成功后） ====== -->
-        <div class="welcome-panel" id="welcomePanel">
-            <div class="welcome-avatar">👤</div>
-            <h2 id="welcomeName">欢迎回来！</h2>
-            <p id="welcomeEmail"></p>
-            <div class="user-info">
-                <div class="info-row">
-                    <span class="info-label">用户名</span>
-                    <span class="info-value" id="infoUsername">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">昵称</span>
-                    <span class="info-value" id="infoNickname">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">邮箱</span>
-                    <span class="info-value" id="infoEmail">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">用户ID</span>
-                    <span class="info-value" id="infoId">-</span>
-                </div>
-            </div>
-            <button class="logout-btn" onclick="handleLogout()">退出登录</button>
-        </div>
     </div>
 
     <!-- Toast 提示 -->
@@ -739,11 +619,232 @@
 
     <script>
         // ============================================
-        // 配置 - API 基础地址
-        // 如果前后端分离部署，修改为后端地址，如 http://localhost:3000
-        // 如果通过后端静态文件服务，留空即可（同源）
+        // 题目数据
         // ============================================
-        const API_BASE = '';  // 同源部署时留空，跨域时填写如 'http://localhost:3000'
+        const quizData = [
+            {
+                id: 1,
+                question: "女生随口说了一句"最近那个包包挺好看的"，你的反应是：",
+                options: [
+                    { text: ""是啊挺好看的。"", score: 0 },
+                    { text: "过节或她生日时，如果经济允许会考虑买。", score: 1 },
+                    { text: "记在心里，第二周就花掉半个月工资买给她制造惊喜。", score: 3 },
+                    { text: "即使要刷信用卡、吃一个月泡面，也要立刻买来送到她楼下。", score: 5 }
+                ]
+            },
+            {
+                id: 2,
+                question: "给她发微信，她过了5个小时才回"刚刚在忙"，你会：",
+                options: [
+                    { text: "继续正常聊接下来的话题。", score: 0 },
+                    { text: "半开玩笑地说"大忙人终于想起我了"。", score: 1 },
+                    { text: "连忙回复"辛苦啦，别太累，有没有按时吃饭？"", score: 3 },
+                    { text: "内心狂喜她居然还回复了，赶紧发个小红包安抚她"忙碌的伤痛"。", score: 5 }
+                ]
+            },
+            {
+                id: 3,
+                question: "两人发生争吵，明明是她做错了事（比如放你鸽子），她的态度是：",
+                options: [
+                    { text: "据理力争，要求她必须认错。", score: 0 },
+                    { text: "表达自己的不爽，但看她态度软化也就算了。", score: 1 },
+                    { text: "主动先认错："虽然你放我鸽子，但我没照顾好你的情绪是我的错。"", score: 3 },
+                    { text: "疯狂反思自己，觉得是因为自己不够优秀、平时给的压力太大，才导致她犯错。", score: 5 }
+                ]
+            },
+            {
+                id: 4,
+                question: "她经常在你面前提起另一个条件很好的"男闺蜜"，你的反应是：",
+                options: [
+                    { text: "直接表达吃醋，并划定界限，不接受这种分享。", score: 0 },
+                    { text: "表面上不动声色，暗地里跟她比拼实力。", score: 1 },
+                    { text: "表现得非常大度："能认识这么优秀的朋友挺好"，生怕显得自己小心眼。", score: 3 },
+                    { text: "主动帮她和男闺蜜制造机会，甚至帮男闺蜜递话，以显示自己的"格局"。", score: 5 }
+                ]
+            },
+            {
+                id: 5,
+                question: "你们已经暧昧了很久，但她在朋友圈发了一张和其他男生的合照，配文"周末的快乐"，并屏蔽了你（但你从别处看到了）：",
+                options: [
+                    { text: "直接挑明，觉得这种人不值得继续。", score: 0 },
+                    { text: "拍个截图发给她，问问什么情况。", score: 1 },
+                    { text: "假装不知道，继续对她好，试图用自己的真心感动她。", score: 3 },
+                    { text: "觉得是自己还没转正，没资格生气，甚至去点赞那条朋友圈。", score: 5 }
+                ]
+            },
+            {
+                id: 6,
+                question: "她突然对你实施"冷暴力"，不回消息不接电话，你会：",
+                options: [
+                    { text: "给她发最后一条消息："想清楚了联系我"，然后去干自己的事。", score: 0 },
+                    { text: "忍住几天不联系，实在憋不住再问候一句。", score: 1 },
+                    { text: "每天早晚安打卡，写小作文反思自己哪里做错了。", score: 3 },
+                    { text: "疯狂打电话，去她家/公司楼下堵她，甚至联系她的闺蜜求她们帮忙劝劝。", score: 5 }
+                ]
+            },
+            {
+                id: 7,
+                question: "她说生病了很难受（只是小感冒），此时你在加班：",
+                options: [
+                    { text: "叮嘱她多喝热水吃药，忙完手头工作再去看她。", score: 0 },
+                    { text: "点个外卖买药送过去，继续加班。", score: 1 },
+                    { text: "直接跟老板请假，翘班跑过去照顾她。", score: 3 },
+                    { text: "翘班跑过去，她还嫌弃你来晚了，你连连道歉并包揽所有家务。", score: 5 }
+                ]
+            },
+            {
+                id: 8,
+                question: "约会时关于花钱的问题，你的常态是：",
+                options: [
+                    { text: "AA制，或者这次我请下次她请。", score: 0 },
+                    { text: "我主动承担大头，但她偶尔也会买杯奶茶。", score: 1 },
+                    { text: "全包，并告诉自己"男人就该多花钱"。", score: 3 },
+                    { text: "全包，而且每个月还会固定给她转"零花钱"，怕她不够花。", score: 5 }
+                ]
+            },
+            {
+                id: 9,
+                question: "发现她撒了一个很明显的谎，你的处理方式是：",
+                options: [
+                    { text: "当面拆穿，要求解释。", score: 0 },
+                    { text: "点到为止，看她怎么圆。", score: 1 },
+                    { text: "心里清楚她在撒谎，但装作相信了，怕戳穿了她会尴尬或生气。", score: 3 },
+                    { text: "帮她找借口："她撒谎肯定是有苦衷的，一定是我不够好才让她不敢说实话。"", score: 5 }
+                ]
+            },
+            {
+                id: 10,
+                question: "她拿你和别的男生做对比，并贬低你："你看人家XX多会说话/多有钱，你再看看你。"",
+                options: [
+                    { text: "回怼："那你去找他啊。"", score: 0 },
+                    { text: "有点不爽，但一笑而过。", score: 1 },
+                    { text: "陷入自卑，暗暗发誓一定要努力改变让她刮目相看。", score: 3 },
+                    { text: "虚心请教："你说得对，我该怎么做才能像他一样？"", score: 5 }
+                ]
+            },
+            {
+                id: 11,
+                question: "你正在打游戏/看球赛的关键时刻，她打电话让你去帮她拿个不重的快递：",
+                options: [
+                    { text: "告诉她自己在忙，让她自己拿或者等会儿。", score: 0 },
+                    { text: "哀求打完这局马上就去。", score: 1 },
+                    { text: "立刻挂机/关掉电视，飞奔下楼拿快递。", score: 3 },
+                    { text: "不仅立刻去拿，还因为自己打游戏没第一时间接电话而自责。", score: 5 }
+                ]
+            },
+            {
+                id: 12,
+                question: "她抱怨你"不够懂我，给不了我情绪价值"，实际上你已经百依百顺了：",
+                options: [
+                    { text: "明确告诉她自己也有底线和情绪，不可能永远单方面输出。", score: 0 },
+                    { text: "问她具体需要怎么做，尝试调整。", score: 1 },
+                    { text: "疯狂上网查"如何提供情绪价值"，像个做错题的小学生一样改正。", score: 3 },
+                    { text: "觉得自己就是个废物，配不上她，给她磕头道歉说自己会继续修炼。", score: 5 }
+                ]
+            },
+            {
+                id: 13,
+                question: "她提出一个让你在经济或面子上很过分的请求（比如借大额钱不还、让你在公共场合出丑）：",
+                options: [
+                    { text: "坚决拒绝。", score: 0 },
+                    { text: "委婉拒绝。", score: 1 },
+                    { text: "犹豫很久，最后为了她还是硬着头皮答应了。", score: 3 },
+                    { text: "爽快答应，事后在兄弟面前还帮她找补："她也是没办法了。"", score: 5 }
+                ]
+            },
+            {
+                id: 14,
+                question: "吵架时她脱口而出"分手吧"，你的第一反应是：",
+                options: [
+                    { text: ""好，保重。"", score: 0 },
+                    { text: ""别闹了，都冷静一下。"", score: 1 },
+                    { text: "瞬间慌了，立刻妥协："我错了，千万别分手，你说什么我都答应。"", score: 3 },
+                    { text: "痛哭流涕，下跪/发几十条语音苦苦哀求，甚至用自残来威胁她不要走。", score: 5 }
+                ]
+            },
+            {
+                id: 15,
+                question: "发现她还在和前任保持联系，甚至偶尔见面：",
+                options: [
+                    { text: "这是底线，不行就拉倒。", score: 0 },
+                    { text: "严重警告，再发现就分手。", score: 1 },
+                    { text: "心里滴血，但假装大度："我相信你们只是朋友。"", score: 3 },
+                    { text: "觉得是自己不够好，她才会怀念前任，于是更加拼命地对她好。", score: 5 }
+                ]
+            },
+            {
+                id: 16,
+                question: "关于未来的规划，你的态度是：",
+                options: [
+                    { text: "事业和自我发展永远排第一，恋爱是顺其自然的事。", score: 0 },
+                    { text: "两人一起商量，共同进步。", score: 1 },
+                    { text: "把她的需求写进人生规划，甚至为了她放弃自己更好的发展机会。", score: 3 },
+                    { text: ""我没有未来，我的未来就是她，她在哪我就在哪。"", score: 5 }
+                ]
+            },
+            {
+                id: 17,
+                question: "她不喜欢你的某个爱好（比如玩车、钓鱼、看动漫），并且明确表示讨厌：",
+                options: [
+                    { text: "尊重彼此的差异，互不干涉。", score: 0 },
+                    { text: "稍微减少一点这方面的时间。", score: 1 },
+                    { text: "当着她的面把相关装备/周边卖掉或扔掉，以表忠心。", score: 3 },
+                    { text: "跟她一起骂自己以前的爱好："确实幼稚，多亏有你点醒我。"", score: 5 }
+                ]
+            },
+            {
+                id: 18,
+                question: "你努力赚钱、健身、提升学历的核心动力是：",
+                options: [
+                    { text: "为了实现自我价值，让自己爽。", score: 0 },
+                    { text: "提升自己，顺便增加择偶筹码。", score: 1 },
+                    { text: "纯粹为了配得上她，怕她哪天因为嫌弃自己而跑掉。", score: 3 },
+                    { text: "觉得只要自己足够强，就能"感化"那个根本不喜欢自己的女神。", score: 5 }
+                ]
+            },
+            {
+                id: 19,
+                question: "面对她莫名其妙的"服从性测试"（比如半夜让你去买特定口味的宵夜）：",
+                options: [
+                    { text: "拒绝这种无理要求，并指出这是不尊重人。", score: 0 },
+                    { text: "哄两句，说明天再吃。", score: 1 },
+                    { text: "穿上衣服跑遍半个城市去买，买不到不睡觉。", score: 3 },
+                    { text: "买回来之后她却说不想吃了，你不仅不生气，还笑着说"没事，你想吃随时叫我"。", score: 5 }
+                ]
+            },
+            {
+                id: 20,
+                question: "如果这段关系最终以她绿了你/嫁给别人而告终，你的事后总结会是：",
+                options: [
+                    { text: "拜拜就拜拜，下一个更乖，及时止损。", score: 0 },
+                    { text: "难过一阵子，但也认清了现实。", score: 1 },
+                    { text: "觉得是自己不够温柔/不够有钱，才没留住她。", score: 3 },
+                    { text: "默默关注她一辈子，在她结婚时发个红包祝她幸福，然后发誓终身不娶/用余生去赎罪。", score: 5 }
+                ]
+            }
+        ];
+
+        // ============================================
+        // 结果等级
+        // ============================================
+        const results = [
+            { min: 0, max: 10, level: "铁血直男 / 正常人类", emoji: "🛡️", desc: "你有着极其健康的自尊心和边界感。在两性关系中，你懂得"先爱自己，再爱别人"。你不仅不是龟男，甚至可能被某些极端女生骂作"直男"或"自私"。继续保持，别被PUA。" },
+            { min: 11, max: 25, level: "轻微顺从 / 偶尔心软", emoji: "🤝", desc: "你是一个正常的男生，有基本的绅士风度，偶尔也会为了哄女生开心而放低姿态，但大是大非面前你拎得清。只要遇到对的人，你会是个好伴侣。注意保持底线，别被得寸进尺。" },
+            { min: 26, max: 50, level: "中度龟男 / 潜力股", emoji: "🐢", desc: "危险信号！你已经有了明显的"讨好型人格"倾向。你常常把女生的感受凌驾于自己的尊严之上，容易被当成"提款机"或"情绪垃圾桶"。你以为自己这是深情，但在对方眼里，这只是廉价且没有底线的付出。" },
+            { min: 51, max: 80, level: "重度龟男 / 绝世好备胎", emoji: "🧱", desc: "你已经是标准的龟男模板了。"自我感动式付出"是你的人生信条。你没有原则，没有底线，对方越践踏你，你越觉得是自己不够好。你可能同时扮演着多个角色的备胎，且毫无怨言。醒醒吧，你感动了天感动了地，但感动不了一个不爱你的人。" },
+            { min: 81, max: 100, level: "龟神降临 / 纯爱战神（受难版）", emoji: "🥇", desc: "恭喜你达成最高境界！你已经完全丧失了独立人格，退化成了纯粹的附属品。别人当备胎还要点尊严，你当备胎还能帮正主修车。你的存在证明了人类多样性的下限。建议立刻断绝一切社交，重造三观，不然这辈子注定在当狗和被抛弃之间反复横跳。" }
+        ];
+
+        // ============================================
+        // 状态管理
+        // ============================================
+        let currentQuestion = 0;
+        let shuffledQuiz = [];
+        let answers = []; // 存储每题选择的分数
+        let totalScore = 0;
+        let currentResult = null;
+
+        const optionLabels = ['A', 'B', 'C', 'D'];
 
         // ============================================
         // Toast 提示
@@ -761,274 +862,216 @@
         }
 
         // ============================================
+        // Fisher-Yates 洗牌算法
+        // ============================================
+        function shuffleArray(arr) {
+            const shuffled = [...arr];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // ============================================
         // 面板切换
         // ============================================
-        function switchPanel(panel) {
-            const loginPanel = document.getElementById('loginPanel');
-            const registerPanel = document.getElementById('registerPanel');
-            const welcomePanel = document.getElementById('welcomePanel');
-            const cardTitle = document.getElementById('cardTitle');
-            const cardSubtitle = document.getElementById('cardSubtitle');
-
-            loginPanel.classList.remove('active');
-            registerPanel.classList.remove('active');
-            welcomePanel.classList.remove('active');
-
-            if (panel === 'login') {
-                loginPanel.classList.add('active');
-                cardTitle.textContent = '登 录';
-                cardSubtitle.textContent = '欢迎回来，请登录你的账号';
-            } else if (panel === 'register') {
-                registerPanel.classList.add('active');
-                cardTitle.textContent = '注 册';
-                cardSubtitle.textContent = '创建一个新账号';
-            } else if (panel === 'welcome') {
-                welcomePanel.classList.add('active');
-                cardTitle.textContent = '✨';
-                cardSubtitle.textContent = '';
-            }
+        function switchPanel(panelId) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(panelId).classList.add('active');
         }
 
         // ============================================
-        // 输入框状态反馈
+        // 开始测试
         // ============================================
-        function setupInputStatus(inputId) {
-            const input = document.getElementById(inputId);
-            input.addEventListener('input', function () {
-                const status = this.parentElement.querySelector('.input-status');
-                if (this.value.length > 0) {
-                    status.className = 'input-status valid';
-                } else {
-                    status.className = 'input-status idle';
-                }
-            });
-            input.addEventListener('blur', function () {
-                const status = this.parentElement.querySelector('.input-status');
-                if (this.value.length === 0) {
-                    status.className = 'input-status invalid';
-                }
-            });
+        function startQuiz() {
+            currentQuestion = 0;
+            answers = [];
+            totalScore = 0;
+            currentResult = null;
+
+            // 深拷贝并打乱每题的选项顺序
+            shuffledQuiz = quizData.map(q => ({
+                ...q,
+                options: shuffleArray(q.options)
+            }));
+
+            switchPanel('quizPanel');
+            renderQuestion();
         }
 
-        setupInputStatus('loginUsername');
-        setupInputStatus('regUsername');
-        setupInputStatus('regEmail');
+        // ============================================
+        // 渲染当前问题
+        // ============================================
+        function renderQuestion() {
+            const q = shuffledQuiz[currentQuestion];
+            const total = shuffledQuiz.length;
+            const progress = ((currentQuestion) / total) * 100;
 
-        // 密码长度校验
-        function setupPasswordStatus(inputId, minLength) {
-            const input = document.getElementById(inputId);
-            input.addEventListener('input', function () {
-                const status = this.parentElement.querySelector('.input-status');
-                if (this.value.length >= minLength) {
-                    status.className = 'input-status valid';
-                } else if (this.value.length > 0) {
-                    status.className = 'input-status idle';
-                } else {
-                    status.className = 'input-status idle';
-                }
+            // 更新进度条
+            document.getElementById('progressText').textContent = (currentQuestion + 1) + ' / ' + total;
+            document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // 更新问题文本
+            document.getElementById('questionText').textContent = q.question;
+
+            // 渲染选项
+            const optionsList = document.getElementById('optionsList');
+            optionsList.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                card.setAttribute('data-score', opt.score);
+                card.innerHTML = `
+                    <div class="option-content">
+                        <span class="option-label">${optionLabels[idx]}</span>
+                        <span class="option-text">${opt.text}</span>
+                    </div>
+                `;
+                card.addEventListener('click', () => selectOption(card, opt.score));
+                optionsList.appendChild(card);
             });
-            input.addEventListener('blur', function () {
-                const status = this.parentElement.querySelector('.input-status');
-                if (this.value.length > 0 && this.value.length < minLength) {
-                    status.className = 'input-status invalid';
-                }
-            });
-        }
 
-        setupPasswordStatus('loginPassword', 6);
-        setupPasswordStatus('regPassword', 6);
-
-        // 确认密码匹配校验
-        const regConfirm = document.getElementById('regConfirm');
-        regConfirm.addEventListener('input', function () {
-            const regPwd = document.getElementById('regPassword').value;
-            const status = this.parentElement.querySelector('.input-status');
-            if (this.value.length === 0) {
-                status.className = 'input-status idle';
-            } else if (this.value === regPwd) {
-                status.className = 'input-status valid';
+            // 更新按钮文字
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentQuestion === total - 1) {
+                nextBtn.textContent = '提 交 答 案';
             } else {
-                status.className = 'input-status invalid';
+                nextBtn.textContent = '下 一 题';
             }
-        });
+            nextBtn.disabled = true;
+
+            // 添加淡入动画
+            const quizPanel = document.getElementById('quizPanel');
+            quizPanel.classList.remove('fade-enter');
+            void quizPanel.offsetWidth; // 触发 reflow
+            quizPanel.classList.add('fade-enter');
+        }
 
         // ============================================
-        // API 请求封装
+        // 选择选项
         // ============================================
-        async function apiRequest(url, method, data) {
-            try {
-                const options = {
-                    method: method,
-                    headers: { 'Content-Type': 'application/json' },
-                };
-                if (data) options.body = JSON.stringify(data);
+        function selectOption(card, score) {
+            // 取消其他选中
+            document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            // 选中当前
+            card.classList.add('selected');
+            // 启用按钮
+            document.getElementById('nextBtn').disabled = false;
+            // 存储当前选择
+            answers[currentQuestion] = score;
+        }
 
-                const response = await fetch(API_BASE + url, options);
-                const result = await response.json();
-                return result;
-            } catch (err) {
-                console.error('API请求失败:', err);
-                return { code: 500, message: '网络连接失败，请检查服务器是否启动' };
+        // ============================================
+        // 下一题 / 提交
+        // ============================================
+        function nextQuestion() {
+            if (answers[currentQuestion] === undefined) {
+                showToast('请先选择一个选项');
+                return;
+            }
+
+            if (currentQuestion < shuffledQuiz.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                // 计算总分
+                totalScore = answers.reduce((sum, s) => sum + s, 0);
+                showResult();
             }
         }
 
         // ============================================
-        // 登录处理
+        // 显示结果
         // ============================================
-        async function handleLogin() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
+        function showResult() {
+            // 找到对应等级
+            currentResult = results.find(r => totalScore >= r.min && totalScore <= r.max) || results[results.length - 1];
 
-            if (!username) { showToast('⚠️ 请输入用户名'); return; }
-            if (!password) { showToast('⚠️ 请输入密码'); return; }
-            if (password.length < 6) { showToast('⚠️ 密码长度不能少于6位'); return; }
+            // 更新进度条到100%
+            document.getElementById('progressBar').style.width = '100%';
 
-            const btn = document.getElementById('loginBtn');
-            btn.textContent = '登录中...';
-            btn.style.opacity = '0.7';
-            btn.style.pointerEvents = 'none';
+            switchPanel('resultPanel');
 
-            const result = await apiRequest('/api/auth/login', 'POST', { username, password });
+            // 填充结果数据
+            document.getElementById('resultEmoji').textContent = currentResult.emoji;
+            document.getElementById('resultLevel').textContent = currentResult.level;
+            document.getElementById('resultDesc').textContent = currentResult.desc;
 
-            btn.textContent = '登 录';
-            btn.style.opacity = '1';
-            btn.style.pointerEvents = 'auto';
+            // 分数动画
+            animateScore(totalScore);
+        }
 
-            if (result.code === 200) {
-                // 保存 Token
-                localStorage.setItem('token', result.data.token);
-                localStorage.setItem('user', JSON.stringify(result.data.user));
+        // ============================================
+        // 分数计数动画
+        // ============================================
+        function animateScore(target) {
+            const scoreEl = document.getElementById('resultScore');
+            const duration = 1500;
+            const startTime = performance.now();
+            const startVal = 0;
 
-                // 记住密码
-                if (document.getElementById('remember').checked) {
-                    localStorage.setItem('savedUsername', username);
-                } else {
-                    localStorage.removeItem('savedUsername');
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // easeOutCubic
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = Math.round(startVal + (target - startVal) * eased);
+
+                scoreEl.textContent = current;
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
                 }
-
-                showToast('✅ 登录成功！');
-
-                // 显示欢迎面板
-                setTimeout(() => {
-                    showWelcomePanel(result.data.user);
-                }, 500);
-            } else {
-                showToast('❌ ' + result.message);
-            }
-        }
-
-        // ============================================
-        // 注册处理
-        // ============================================
-        async function handleRegister() {
-            const username = document.getElementById('regUsername').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value;
-            const confirm = document.getElementById('regConfirm').value;
-
-            if (!username) { showToast('⚠️ 请输入用户名'); return; }
-            if (username.length < 3 || username.length > 20) { showToast('⚠️ 用户名长度需在3-20个字符之间'); return; }
-            if (!password) { showToast('⚠️ 请输入密码'); return; }
-            if (password.length < 6) { showToast('⚠️ 密码长度不能少于6位'); return; }
-            if (password !== confirm) { showToast('⚠️ 两次输入的密码不一致'); return; }
-
-            const btn = document.getElementById('registerBtn');
-            btn.textContent = '注册中...';
-            btn.style.opacity = '0.7';
-            btn.style.pointerEvents = 'none';
-
-            const result = await apiRequest('/api/auth/register', 'POST', {
-                username,
-                password,
-                email: email || undefined,
-                nickname: username
-            });
-
-            btn.textContent = '注 册';
-            btn.style.opacity = '1';
-            btn.style.pointerEvents = 'auto';
-
-            if (result.code === 201) {
-                showToast('🎉 注册成功！已自动登录');
-                localStorage.setItem('token', result.data.token);
-                localStorage.setItem('user', JSON.stringify(result.data.user));
-
-                setTimeout(() => {
-                    showWelcomePanel(result.data.user);
-                }, 500);
-            } else {
-                showToast('❌ ' + result.message);
-            }
-        }
-
-        // ============================================
-        // 显示欢迎面板
-        // ============================================
-        function showWelcomePanel(user) {
-            document.getElementById('welcomeName').textContent = '欢迎回来，' + (user.nickname || user.username) + '！';
-            document.getElementById('welcomeEmail').textContent = user.email || '';
-            document.getElementById('infoUsername').textContent = user.username;
-            document.getElementById('infoNickname').textContent = user.nickname || user.username;
-            document.getElementById('infoEmail').textContent = user.email || '未设置';
-            document.getElementById('infoId').textContent = '#' + user.id;
-            switchPanel('welcome');
-        }
-
-        // ============================================
-        // 退出登录
-        // ============================================
-        function handleLogout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            showToast('👋 已退出登录');
-            switchPanel('login');
-            document.getElementById('loginPassword').value = '';
-        }
-
-        // ============================================
-        // 回车键提交
-        // ============================================
-        document.getElementById('loginForm').addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') { e.preventDefault(); handleLogin(); }
-        });
-        document.getElementById('registerForm').addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') { e.preventDefault(); handleRegister(); }
-        });
-
-        // ============================================
-        // 页面加载时：检查是否已登录 / 恢复记住的用户名
-        // ============================================
-        (function init() {
-            // 恢复记住的用户名
-            const savedUsername = localStorage.getItem('savedUsername');
-            if (savedUsername) {
-                document.getElementById('loginUsername').value = savedUsername;
-                document.getElementById('remember').checked = true;
             }
 
-            // 检查是否有保存的 Token，尝试自动登录
-            const token = localStorage.getItem('token');
-            const user = localStorage.getItem('user');
-            if (token && user) {
-                // 尝试用 Token 获取用户信息
-                fetch(API_BASE + '/api/auth/profile', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                })
-                .then(res => res.json())
-                .then(result => {
-                    if (result.code === 200) {
-                        showWelcomePanel(result.data);
-                    } else {
-                        // Token 失效，清除
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('user');
-                    }
-                })
-                .catch(() => {
-                    // 网络错误，不处理，保持登录页面
+            requestAnimationFrame(update);
+        }
+
+        // ============================================
+        // 重新测试
+        // ============================================
+        function restartQuiz() {
+            switchPanel('homePanel');
+        }
+
+        // ============================================
+        // 分享结果
+        // ============================================
+        function shareResult() {
+            if (!currentResult) return;
+
+            const shareText = `我在龟男属性鉴定中获得了${totalScore}分，鉴定结果：${currentResult.emoji} ${currentResult.level}！你也来测测吧~`;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showToast('已复制到剪贴板，快去分享吧！');
+                }).catch(() => {
+                    fallbackCopy(shareText);
                 });
+            } else {
+                fallbackCopy(shareText);
             }
-        })();
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('已复制到剪贴板，快去分享吧！');
+            } catch (e) {
+                showToast('复制失败，请手动复制');
+            }
+            document.body.removeChild(textarea);
+        }
     </script>
 </body>
 </html>
